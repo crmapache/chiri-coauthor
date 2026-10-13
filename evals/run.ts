@@ -28,6 +28,9 @@ type Run = {
 }
 
 const REPEATS = Number(process.env.REPEATS ?? 2)
+
+/** The prompt asks for 12 words; a little slack so one long word or a dash does not count against. */
+const MAX_REASON_WORDS = 14
 const apiKey = process.env.OPENROUTER_API_KEY
 
 if (!apiKey) throw new Error('Set OPENROUTER_API_KEY (see .env.example)')
@@ -113,12 +116,15 @@ function summarize(runs: Run[]) {
   const placed = placementRuns.reduce((total, run) => total + run.placed, 0)
   const latencies = runs.map((run) => run.latencyMs)
   const cost = runs.reduce((total, run) => total + run.costUsd, 0)
+  const allEdits = runs.flatMap((run) => run.edits)
+  const shortReasons = allEdits.filter((edit) => edit.reason.split(/\s+/).length <= MAX_REASON_WORDS).length
 
   return {
     checks: `${checks}/${checksTotal}`,
     checkRate: checks / checksTotal,
     casesClean: runs.filter((run) => run.checksPassed === run.checksTotal).length / runs.length,
     placementRate: proposed ? placed / proposed : 1,
+    shortReasonRate: allEdits.length ? shortReasons / allEdits.length : 1,
     retries: runs.filter((run) => run.attempts > 1).length,
     errors: runs.filter((run) => run.error).length,
     medianMs: percentile(latencies, 0.5),
@@ -156,11 +162,11 @@ async function main() {
   )
 
   const table = [
-    '| Model | Checks passed | Cases fully right | Edits placed | Retries | Errors | Median | p90 | Cost / request |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '| Model | Checks passed | Cases fully right | Edits placed | Short reasons | Retries | Errors | Median | p90 | Cost / request |',
+    '|---|---|---|---|---|---|---|---|---|---|',
     ...perModel.map(
       ({ model, summary }) =>
-        `| ${model.label} | ${summary.checks} (${percent(summary.checkRate)}) | ${percent(summary.casesClean)} | ${percent(summary.placementRate)} | ${summary.retries} | ${summary.errors} | ${(summary.medianMs / 1000).toFixed(1)} s | ${(summary.p90Ms / 1000).toFixed(1)} s | $${summary.costPerRequest.toFixed(5)} |`,
+        `| ${model.label} | ${summary.checks} (${percent(summary.checkRate)}) | ${percent(summary.casesClean)} | ${percent(summary.placementRate)} | ${percent(summary.shortReasonRate)} | ${summary.retries} | ${summary.errors} | ${(summary.medianMs / 1000).toFixed(1)} s | ${(summary.p90Ms / 1000).toFixed(1)} s | $${summary.costPerRequest.toFixed(5)} |`,
     ),
   ].join('\n')
 

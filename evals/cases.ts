@@ -1,3 +1,5 @@
+import { diffChars } from 'diff'
+
 import type { SuggestRequest, TextRange } from '../shared/contract.js'
 import { SAMPLE_DOCUMENT } from '../src/sample/sampleDocument.js'
 
@@ -43,11 +45,43 @@ const lacks = (text: string) => ({
   passes: (result: EvalResult) => !result.passage.includes(text),
 })
 
+/** Share of characters that changed between two texts, 0 to 1. */
+function changedShare(before: string, after: string): number {
+  const changed = diffChars(before, after)
+    .filter((part) => part.added || part.removed)
+    .reduce((total, part) => total + part.value.length, 0)
+
+  return changed / Math.max(before.length, 1)
+}
+
+const minimal = (original: string, limit: number) => ({
+  name: `changes at most ${Math.round(limit * 100)}% of the text`,
+  passes: (result: EvalResult) => changedShare(original, result.passage) <= limit,
+})
+
+/** Numbers in the result that the source never had: the model made a fact up. */
+const inventsNoNumbers = (source: string) => ({
+  name: 'invents no numbers',
+  passes: (result: EvalResult) => {
+    const known = new Set(source.match(/\d+(?:[.,]\d+)?%?/g) ?? [])
+
+    return (result.passage.match(/\d+(?:[.,]\d+)?%?/g) ?? []).every((number) => known.has(number))
+  },
+})
+
 const WHY = lineStartingWith(SAMPLE_DOCUMENT, 'Our customers')
 const TIMELINE = lineStartingWith(SAMPLE_DOCUMENT, 'Beta starts')
 const LIST_ITEM = lineStartingWith(SAMPLE_DOCUMENT, '- have there')
 const OPEN_QUESTIONS = lineStartingWith(SAMPLE_DOCUMENT, 'We still need')
 const CLEAN = 'The first version will let technicians:'
+
+const PARTIAL = 'basically non-existent, and when the app can\'t connect they loose whatever they were typing'
+
+const CLEAN_DOCUMENT = `# Weekly update
+
+Support volume fell 12% this week after we fixed the login loop on Android. The fix shipped on Tuesday, and the related tickets stopped within a day.
+
+Next week we start the billing migration. Finance has signed off on the plan, and we will move the first 50 accounts on Wednesday.`
 
 const SPANISH = `# Resumen de la reunión
 
@@ -64,7 +98,25 @@ export const CASES: EvalCase[] = [
     id: 'grammar-paragraph',
     description: 'Fix grammar in a paragraph with two seeded errors',
     request: selection(SAMPLE_DOCUMENT, WHY, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
-    checks: [lacks('they loose'), lacks('field has been'), contains('40%'), contains('basements')],
+    checks: [lacks('they loose'), lacks('field has been'), contains('40%'), minimal(WHY, 0.12)],
+  },
+  {
+    id: 'partial-selection',
+    description: 'Fix grammar in half a sentence without touching the rest',
+    request: selection(SAMPLE_DOCUMENT, PARTIAL, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    checks: [lacks('they loose'), contains('basically'), minimal(PARTIAL, 0.12)],
+  },
+  {
+    id: 'add-without-inventing',
+    description: 'Add a sentence about impact without making up numbers',
+    request: selection(SAMPLE_DOCUMENT, WHY, 'Add one sentence about the impact we expect from this launch.'),
+    checks: [inventsNoNumbers(SAMPLE_DOCUMENT), contains('40%')],
+  },
+  {
+    id: 'improve-keeps-facts',
+    description: 'Improve a paragraph, keep every fact',
+    request: selection(SAMPLE_DOCUMENT, TIMELINE, 'Improve this passage: make it clearer and more direct without changing its meaning.'),
+    checks: [contains('March 3'), contains('three customers'), contains('April'), inventsNoNumbers(SAMPLE_DOCUMENT)],
   },
   {
     id: 'shorten-keeps-facts',
@@ -123,6 +175,29 @@ export const CASES: EvalCase[] = [
       },
       { name: 'between 2 and 6 edits', passes: (result) => result.editCount >= 2 && result.editCount <= 6 },
       contains('March 3'),
+    ],
+  },
+  {
+    id: 'review-restraint',
+    description: 'Review a document that is already good: leave it mostly alone',
+    request: { mode: 'document', document: CLEAN_DOCUMENT },
+    checks: [
+      { name: 'at most 2 edits', passes: (result) => result.editCount <= 2 },
+      contains('12%'),
+      contains('first 50 accounts'),
+    ],
+  },
+  {
+    id: 'rename-term-everywhere',
+    description: 'Whole-document instruction to rename a term everywhere',
+    request: {
+      mode: 'document',
+      document: SAMPLE_DOCUMENT,
+      instruction: "Say 'field engineers' instead of 'technicians' everywhere. Change nothing else.",
+    },
+    checks: [
+      { name: 'no "technician" left', passes: (result) => !/technician/i.test(result.document) },
+      { name: 'only the renames (at most 3 edits)', passes: (result) => result.editCount <= 3 },
     ],
   },
   {
