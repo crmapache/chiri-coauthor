@@ -45,7 +45,7 @@ export function editorText(page: Page) {
 export async function mockSuggest(
   page: Page,
   edits: MockEdit[] | ((request: SuggestRequest) => MockEdit[]),
-  options: { delayMs?: number; note?: string } = {},
+  options: { delayMs?: number; note?: string; skipped?: number } = {},
 ) {
   const requests: SuggestRequest[] = []
 
@@ -64,7 +64,7 @@ export async function mockSuggest(
         return { ...edit, from, to: from + edit.quote.length }
       }),
       note: options.note ?? '',
-      skipped: 0,
+      skipped: options.skipped ?? 0,
       model: 'mock/model',
     }
 
