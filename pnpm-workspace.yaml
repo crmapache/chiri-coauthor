@@ -1,0 +1,4 @@
+# pnpm runs dependency install scripts only when explicitly allowed.
+allowBuilds:
+  esbuild: true # downloads its native binary; Vite cannot build without it
+  '@parcel/watcher': false # optional Sass watcher, Vite handles file watching itself
