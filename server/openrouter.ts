@@ -4,8 +4,11 @@ import { MODEL_OUTPUT_JSON_SCHEMA, type ChatMessage } from './prompts.js'
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 
-/** Long enough for a full review of a long document, short enough that a hung request ends. */
-const TIMEOUT_MS = 60_000
+/**
+ * Long enough for a full review of a long document, and below the 60 s function limit in
+ * vercel.json, so a hung model ends in a readable timeout instead of a killed function.
+ */
+const TIMEOUT_MS = 50_000
 
 export type Completion = {
   content: string
