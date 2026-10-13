@@ -1,0 +1,45 @@
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.notice {
+  position: fixed;
+  z-index: 40;
+  bottom: var(--space-5);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(560px, calc(100vw - 32px));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  transform: translateX(-50%);
+  box-shadow: var(--shadow-float);
+  line-height: 1.45;
+  animation: slide var(--duration-move) var(--ease);
+}
+
+.info {
+  background: var(--ink);
+  color: var(--paper);
+
+  button {
+    color: var(--paper);
+  }
+}
+
+.error {
+  background: var(--danger-wash);
+  color: var(--danger);
+  box-shadow:
+    inset 0 0 0 1px var(--removed-line),
+    var(--shadow-float);
+}

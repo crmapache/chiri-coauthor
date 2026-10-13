@@ -1,0 +1,65 @@
+/* Design tokens. Components read these through var(); no raw colours or spacings elsewhere. */
+:root {
+  --font-ui: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --font-document: 'Source Serif 4 Variable', Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --document-size: 18px;
+  --ui-size: 14px;
+  --ui-size-small: 12.5px;
+
+  --canvas: #f3f1ec;
+  --paper: #fffefb;
+  --line: #e4dfd5;
+  --line-strong: #d3ccbf;
+  --ink: #1d1b18;
+  --ink-muted: #5f5a52;
+  --ink-faint: #a39d92;
+  --surface-hover: #f1eee8;
+  --surface-press: #e8e4dc;
+
+  --accent: #2f3fd1;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(47, 63, 209, 0.3);
+  --accent-wash: #eef0fd;
+  --link: #2f3fd1;
+  --selection: rgba(47, 63, 209, 0.16);
+
+  --removed-ink: #9f2a1b;
+  --removed-bg: #fcebe8;
+  --removed-line: #c4402f;
+  --added-ink: #11603a;
+  --added-bg: #e2f4e8;
+  --added-line: #2f9e5f;
+  --suggestion-span: rgba(47, 63, 209, 0.07);
+  --pending-a: rgba(47, 63, 209, 0.05);
+  --pending-b: rgba(47, 63, 209, 0.2);
+
+  --danger: #b42318;
+  --danger-wash: #fdeceb;
+
+  --shadow-card: 0 1px 2px rgba(29, 27, 24, 0.06), 0 6px 20px rgba(29, 27, 24, 0.07);
+  --shadow-float: 0 2px 6px rgba(29, 27, 24, 0.1), 0 12px 32px rgba(29, 27, 24, 0.14);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration-hover: 160ms;
+  --duration-press: 120ms;
+  --duration-move: 220ms;
+
+  --topbar-height: 60px;
+  --paper-width: 720px;
+  --margin-width: 300px;
+}

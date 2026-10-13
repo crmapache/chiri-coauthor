@@ -1,0 +1,25 @@
+@use '../../../theme/mixins' as *;
+
+.iconButton {
+  @include button-reset;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+}
+
+.neutral {
+  @include interactive;
+}
+
+.accept {
+  @include interactive(var(--added-bg), var(--added-bg));
+  color: var(--added-ink);
+}
+
+.reject {
+  @include interactive(var(--removed-bg), var(--removed-bg));
+  color: var(--removed-ink);
+}

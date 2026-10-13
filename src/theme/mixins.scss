@@ -1,0 +1,29 @@
+/* Shared interaction states. Hover only on devices that really hover, press after hover. */
+@mixin interactive($hover-bg: var(--surface-hover), $press-bg: var(--surface-press)) {
+  cursor: pointer;
+  transition: background-color var(--duration-hover) var(--ease);
+
+  @media (hover: hover) {
+    &:not(:disabled):hover {
+      background-color: $hover-bg;
+    }
+  }
+
+  &:not(:disabled):active {
+    background-color: $press-bg;
+    transition-duration: var(--duration-press);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+@mixin button-reset {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+}

@@ -1,0 +1,8 @@
+.margin {
+  position: relative;
+  min-height: var(--margin-height, 0px);
+
+  @media (max-width: 1100px) {
+    min-height: 0;
+  }
+}

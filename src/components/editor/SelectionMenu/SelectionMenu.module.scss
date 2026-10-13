@@ -1,0 +1,79 @@
+@use '../../../theme/mixins' as *;
+
+@keyframes rise {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.menu {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  transform: translate(var(--menu-left, 0px), var(--menu-top, 0px));
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    var(--shadow-float);
+  animation: rise var(--duration-hover) var(--ease);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.action,
+.ask {
+  @include button-reset;
+  @include interactive;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ask {
+  color: var(--accent);
+}
+
+.divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 var(--space-1);
+  background: var(--line);
+}
+
+.askForm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: min(460px, calc(100vw - 48px));
+  padding-left: var(--space-2);
+}
+
+.sparkle {
+  flex: none;
+  color: var(--accent);
+}
+
+.askInput {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  border: 0;
+  outline: none;
+  background: none;
+}
