@@ -1,4 +1,6 @@
-import type { AnchoredEdit, TextRange } from './contract.js'
+import { diffWordsWithSpace } from 'diff'
+
+import { MAX_REASON_LENGTH, type AnchoredEdit, type TextRange } from './contract.js'
 
 /** An edit as the model wrote it: a quote it wants to change, before we know where it is. */
 export type RawEdit = { quote: string; replacement: string; reason: string }
@@ -107,19 +109,73 @@ export function locateQuote(document: string, quote: string, within?: TextRange)
  * When a quote only matched after trimming, its replacement usually carries the same stray
  * whitespace at the edges. Dropping it keeps the edit from adding blank lines nobody asked for.
  */
-function alignReplacement(quote: string, matched: string, replacement: string): string {
-  if (quote === matched) return replacement
-
+function trimSharedEdges(quote: string, replacement: string): string {
   const leading = quote.match(/^\s*/)?.[0] ?? ''
   const trailing = quote.match(/\s*$/)?.[0] ?? ''
 
-  let aligned = replacement
+  let trimmed = replacement
 
-  if (leading && aligned.startsWith(leading)) aligned = aligned.slice(leading.length)
+  if (leading && trimmed.startsWith(leading)) trimmed = trimmed.slice(leading.length)
 
-  if (trailing && aligned.endsWith(trailing)) aligned = aligned.slice(0, -trailing.length)
+  if (trailing && trimmed.endsWith(trailing)) trimmed = trimmed.slice(0, -trailing.length)
 
-  return aligned
+  return trimmed
+}
+
+/**
+ * Re-applies the model's change to the real text when its quote matched only loosely. The quote
+ * may have a space where the document has a line break, and taking the replacement as is would
+ * glue two list items or a heading and its paragraph together. Instead, the parts of the quote the
+ * model kept are copied from the document, and only what it actually changed comes from the model.
+ */
+function transplant(quote: string, matched: string, replacement: string): string {
+  const trimmedQuote = quote.trim()
+  const normalizedQuote = normalize(trimmedQuote)
+  const normalizedMatch = normalize(matched)
+
+  if (normalizedQuote.text !== normalizedMatch.text) return trimSharedEdges(quote, replacement)
+
+  const length = normalizedQuote.text.length
+  const quoteToNormalized: number[] = new Array(trimmedQuote.length + 1).fill(length)
+
+  normalizedQuote.starts.forEach((start, index) => {
+    for (let position = start; position < (normalizedQuote.ends[index] as number); position++) {
+      quoteToNormalized[position] = index
+    }
+  })
+
+  const matchedAt = (normalizedIndex: number) =>
+    normalizedIndex >= length ? matched.length : (normalizedMatch.starts[normalizedIndex] as number)
+
+  let result = ''
+  let position = 0
+
+  for (const part of diffWordsWithSpace(trimmedQuote, trimSharedEdges(quote, replacement))) {
+    if (part.added) {
+      result += part.value
+      continue
+    }
+
+    const end = position + part.value.length
+
+    if (!part.removed) {
+      result += matched.slice(
+        matchedAt(quoteToNormalized[position] as number),
+        matchedAt(quoteToNormalized[end] as number),
+      )
+    }
+
+    position = end
+  }
+
+  return result
+}
+
+/** Cuts an over-long reason to one line's worth, so it still fits the contract when sent back. */
+export function clampReason(reason: string): string {
+  const trimmed = reason.trim()
+
+  return trimmed.length > MAX_REASON_LENGTH ? `${trimmed.slice(0, MAX_REASON_LENGTH - 1)}…` : trimmed
 }
 
 /**
@@ -130,11 +186,15 @@ export function anchorEdits(
   document: string,
   rawEdits: RawEdit[],
   within?: TextRange,
+  limit = Infinity,
 ): { edits: AnchoredEdit[]; failures: AnchorFailure[] } {
   const edits: AnchoredEdit[] = []
   const failures: AnchorFailure[] = []
 
   for (const raw of rawEdits) {
+    // The model lists its most valuable edits first; the cut happens in its order, not the text's.
+    if (edits.length >= limit) break
+
     const located = locateQuote(document, raw.quote, within)
 
     if (!located.ok) {
@@ -143,7 +203,7 @@ export function anchorEdits(
     }
 
     const matched = document.slice(located.from, located.to)
-    const replacement = alignReplacement(raw.quote, matched, raw.replacement)
+    const replacement = matched === raw.quote ? raw.replacement : transplant(raw.quote, matched, raw.replacement)
 
     if (replacement === matched) {
       failures.push({ quote: raw.quote, reason: 'no-change' })
@@ -162,7 +222,7 @@ export function anchorEdits(
       to: located.to,
       quote: matched,
       replacement,
-      reason: raw.reason.trim(),
+      reason: clampReason(raw.reason),
     })
   }
 

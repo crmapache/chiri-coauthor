@@ -9,6 +9,15 @@ import { z } from 'zod'
 export const MAX_DOCUMENT_LENGTH = 40_000
 export const MAX_INSTRUCTION_LENGTH = 500
 
+/**
+ * A selection is rewritten in one answer that quotes it and returns its replacement, so the answer
+ * is about twice the selection. Past this size it stops fitting into one response.
+ */
+export const MAX_SELECTION_LENGTH = 12_000
+
+/** Reasons are meant to be one line. Longer ones are cut, so they can be sent back when refining. */
+export const MAX_REASON_LENGTH = 300
+
 /** Refinements are a conversation about one edit; after this many the writer should start over. */
 export const MAX_REFINE_TURNS = 8
 
@@ -18,12 +27,13 @@ const instruction = z.string().trim().min(1).max(MAX_INSTRUCTION_LENGTH)
 const range = z
   .object({ from: z.number().int().min(0), to: z.number().int().min(0) })
   .refine(({ from, to }) => from < to, 'Range must not be empty')
+  .refine(({ from, to }) => to - from <= MAX_SELECTION_LENGTH, 'Selection is too long')
 
 /** One step in the life of an edit: what was asked and what the model answered. */
 export const turnSchema = z.object({
   instruction,
   replacement: z.string().max(MAX_DOCUMENT_LENGTH),
-  reason: z.string().max(400),
+  reason: z.string().max(MAX_REASON_LENGTH),
 })
 
 export const suggestRequestSchema = z.discriminatedUnion('mode', [

@@ -12,6 +12,8 @@ const TIMEOUT_MS = 50_000
 
 export type Completion = {
   content: string
+  /** `length` means the answer was cut off at the token limit and its JSON is incomplete. */
+  finishReason: string | null
   model: string
   promptTokens: number
   completionTokens: number
@@ -21,7 +23,7 @@ export type Completion = {
 
 type CompletionBody = {
   model?: string
-  choices?: { message?: { content?: string | null } }[]
+  choices?: { message?: { content?: string | null }; finish_reason?: string | null }[]
   usage?: { prompt_tokens?: number; completion_tokens?: number; cost?: number }
   error?: { code?: number | string; message?: string }
 }
@@ -30,6 +32,7 @@ export type CompleteOptions = {
   apiKey: string
   model: ModelProfile
   messages: ChatMessage[]
+  maxTokens: number
   signal?: AbortSignal
   fetchImpl?: typeof fetch
 }
@@ -63,6 +66,7 @@ export async function complete({
   apiKey,
   model,
   messages,
+  maxTokens,
   signal,
   fetchImpl = fetch,
 }: CompleteOptions): Promise<Completion> {
@@ -83,7 +87,7 @@ export async function complete({
       body: JSON.stringify({
         model: model.id,
         messages,
-        max_tokens: 4000,
+        max_tokens: maxTokens,
         ...(model.reasoning ? { reasoning: model.reasoning } : {}),
         response_format: {
           type: 'json_schema',
@@ -107,7 +111,8 @@ export async function complete({
     throw errorForStatus(status, body.error?.message ?? '')
   }
 
-  const content = body.choices?.[0]?.message?.content
+  const choice = body.choices?.[0]
+  const content = choice?.message?.content
 
   if (!content) {
     throw new ApiError('model-output', 'The model returned an empty answer. Try again.')
@@ -115,6 +120,7 @@ export async function complete({
 
   return {
     content,
+    finishReason: choice?.finish_reason ?? null,
     model: body.model ?? model.id,
     promptTokens: body.usage?.prompt_tokens ?? 0,
     completionTokens: body.usage?.completion_tokens ?? 0,

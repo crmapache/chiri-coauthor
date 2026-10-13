@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { anchorEdits, type AnchorFailure, type RawEdit } from '../shared/anchor.js'
+import { anchorEdits, clampReason, type AnchorFailure, type RawEdit } from '../shared/anchor.js'
 import type { AnchoredEdit, SuggestRequest, SuggestResponse, TextRange } from '../shared/contract.js'
 import { ApiError } from './errors.js'
 import type { ModelProfile } from './models.js'
@@ -81,40 +81,52 @@ function editableRange(request: SuggestRequest): TextRange | undefined {
 }
 
 /**
- * A refinement is always about one known span, so the model's quote is not trusted for placement:
- * the edit is pinned to the target range and only the new text and reason are taken.
+ * A refinement is about one known span. The model is asked to quote all of it, but it sometimes
+ * quotes only the sentences it changed. Either way its edits are placed inside the span and folded
+ * into one new version of the whole span, so text it did not mention is kept, not dropped.
  */
 function placeRefinement(request: SuggestRequest & { mode: 'refine' }, output: ModelOutput) {
-  const [first] = output.edits
+  const { target, document } = request
+  const passage = document.slice(target.from, target.to)
+  const placed = anchorEdits(document, output.edits as RawEdit[], target)
 
-  if (!first) return { edits: [], failures: [] }
+  if (placed.edits.length === 0) return placed
 
-  const quote = request.document.slice(request.target.from, request.target.to)
+  let replacement = passage
 
-  if (first.replacement === quote) {
-    return { edits: [], failures: [{ quote, reason: 'no-change' as const }] }
+  for (const edit of [...placed.edits].reverse()) {
+    replacement =
+      replacement.slice(0, edit.from - target.from) + edit.replacement + replacement.slice(edit.to - target.from)
   }
 
-  const edit: AnchoredEdit = {
-    ...request.target,
-    quote,
-    replacement: first.replacement,
-    reason: first.reason.trim(),
+  if (replacement === passage) {
+    return { edits: [], failures: [{ quote: passage, reason: 'no-change' as const }] }
   }
 
-  return { edits: [edit], failures: [] }
+  const reason = clampReason(placed.edits.map((edit) => edit.reason).join(' '))
+  const edit: AnchoredEdit = { ...target, quote: passage, replacement, reason }
+
+  return { edits: [edit], failures: placed.failures }
 }
 
 function placeEdits(request: SuggestRequest, output: ModelOutput) {
   if (request.mode === 'refine') return placeRefinement(request, output)
 
-  const placed = anchorEdits(request.document, output.edits as RawEdit[], editableRange(request))
-
   if (request.mode === 'document') {
-    return { ...placed, edits: placed.edits.slice(0, MAX_REVIEW_EDITS) }
+    return anchorEdits(request.document, output.edits as RawEdit[], undefined, MAX_REVIEW_EDITS)
   }
 
-  return placed
+  return anchorEdits(request.document, output.edits as RawEdit[], request.selection)
+}
+
+/** Reviews return a handful of short edits. Selections are quoted and rewritten, so the answer
+ * grows with them; the fixed part covers reasoning and JSON overhead. */
+function tokenBudget(request: SuggestRequest): number {
+  const range = editableRange(request)
+
+  if (!range) return 4000
+
+  return Math.min(16_000, 2000 + Math.ceil((range.to - range.from) / 2))
 }
 
 /**
@@ -142,12 +154,17 @@ export async function suggest(request: SuggestRequest, deps: SuggestDeps): Promi
   while (stats.attempts < MAX_ATTEMPTS) {
     stats.attempts++
 
-    const completion = await complete({ ...deps, messages })
+    const completion = await complete({ ...deps, messages, maxTokens: tokenBudget(request) })
 
     lastCompletion = completion
     stats.costUsd += completion.costUsd
     stats.promptTokens += completion.promptTokens
     stats.completionTokens += completion.completionTokens
+
+    // A cut-off answer would be cut off again on retry; say what to do instead of paying twice.
+    if (completion.finishReason === 'length') {
+      throw new ApiError('model-output', 'That was too much text for one answer. Try a shorter selection.')
+    }
 
     const output = parseModelOutput(completion.content)
 

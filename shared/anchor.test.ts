@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { anchorEdits, locateQuote } from './anchor'
+import { MAX_REASON_LENGTH } from './contract'
 
 const DOC = `# Launch notes
 
@@ -70,5 +71,31 @@ describe('anchorEdits', () => {
     ])
 
     expect(edits[0]).toMatchObject({ quote: 'field teams', replacement: 'field crews' })
+  })
+
+  it('keeps the line breaks of the real text when the quote only matched loosely', () => {
+    const { edits } = anchorEdits('- one\n- two\n', [{ quote: '- one - two', replacement: '- One - two', reason: 'r' }])
+
+    expect(edits[0]).toMatchObject({ quote: '- one\n- two', replacement: '- One\n- two' })
+  })
+
+  it('cuts an over-long reason so it can be sent back when refining', () => {
+    const { edits } = anchorEdits(DOC, [{ quote: 'field teams', replacement: 'field crews', reason: 'x'.repeat(1000) }])
+
+    expect(edits[0]?.reason.length).toBeLessThanOrEqual(MAX_REASON_LENGTH)
+  })
+
+  it('applies a limit in the order the model ranked its edits, not in text order', () => {
+    const { edits } = anchorEdits(
+      DOC,
+      [
+        { quote: 'every 5 minutes', replacement: 'every five minutes', reason: 'most valuable' },
+        { quote: 'Launch notes', replacement: 'Release notes', reason: 'less valuable' },
+      ],
+      undefined,
+      1,
+    )
+
+    expect(edits.map((edit) => edit.reason)).toEqual(['most valuable'])
   })
 })

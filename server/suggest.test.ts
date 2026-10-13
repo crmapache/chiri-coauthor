@@ -93,22 +93,70 @@ describe('suggest', () => {
     expect(response.skipped).toBe(1)
   })
 
-  it('pins a refinement to the target range whatever the model quotes', async () => {
-    const target = { from: DOC.indexOf('They loose their'), to: DOC.indexOf('They loose their') + 21 }
-    const { fetchImpl } = fakeOpenRouter({ content: edits({ quote: 'something else', replacement: 'They lose work.' }) })
+  const refineRequest = (target: { from: number; to: number }): SuggestRequest => ({
+    mode: 'refine',
+    document: DOC,
+    target,
+    turns: [{ instruction: 'Fix', replacement: 'x', reason: 'r' }],
+    feedback: 'Shorter',
+  })
 
-    const { response } = await suggest(
-      {
-        mode: 'refine',
-        document: DOC,
-        target,
-        turns: [{ instruction: 'Fix', replacement: 'They lose their work', reason: 'r' }],
-        feedback: 'Shorter',
-      },
+  it('uses a whole-passage answer to a refinement as the new version', async () => {
+    const target = { from: DOC.indexOf('They loose their'), to: DOC.indexOf('They loose their') + 21 }
+    const { fetchImpl } = fakeOpenRouter({ content: edits({ quote: 'They loose their work', replacement: 'They lose work' }) })
+
+    const { response } = await suggest(refineRequest(target), { apiKey: 'k', model: MODEL, fetchImpl })
+
+    expect(response.edits).toEqual([{ ...target, quote: 'They loose their work', replacement: 'They lose work', reason: 'r' }])
+  })
+
+  it('keeps the rest of the passage when a refinement quotes only part of it', async () => {
+    const passage = 'They loose their work. They loose patience too.'
+    const target = { from: DOC.indexOf(passage), to: DOC.indexOf(passage) + passage.length }
+    const { fetchImpl } = fakeOpenRouter({ content: edits({ quote: 'They loose patience too.', replacement: 'And patience.' }) })
+
+    const { response } = await suggest(refineRequest(target), { apiKey: 'k', model: MODEL, fetchImpl })
+
+    expect(response.edits[0]?.replacement).toBe('They loose their work. And patience.')
+    expect(response.edits[0]).toMatchObject(target)
+  })
+
+  it('does not paste a refinement whose quote is not in the passage', async () => {
+    const target = { from: DOC.indexOf('They loose their'), to: DOC.indexOf('They loose their') + 21 }
+    const { fetchImpl, sent } = fakeOpenRouter({ content: edits({ quote: 'something else', replacement: 'Oops' }) })
+
+    const { response } = await suggest(refineRequest(target), { apiKey: 'k', model: MODEL, fetchImpl })
+
+    expect(sent).toHaveLength(2)
+    expect(response.edits).toEqual([])
+    expect(response.skipped).toBe(1)
+  })
+
+  it('stops at once with a clear message when the answer was cut off at the token limit', async () => {
+    const cutOff = {
+      model: 'test/model',
+      choices: [{ message: { content: '{"edits":[{"quote":"Our cust' }, finish_reason: 'length' }],
+    }
+    const { fetchImpl, sent } = fakeOpenRouter({ body: cutOff })
+
+    const failure = await suggest({ mode: 'document', document: DOC }, { apiKey: 'k', model: MODEL, fetchImpl }).catch(
+      (error: unknown) => error,
+    )
+
+    expect(sent).toHaveLength(1)
+    expect(failure).toMatchObject({ code: 'model-output', message: expect.stringContaining('shorter selection') })
+  })
+
+  it('gives long selections a bigger answer budget', async () => {
+    const long = `${'word '.repeat(2000)}end.`
+    const { fetchImpl, sent } = fakeOpenRouter({ content: edits({ quote: 'end.', replacement: 'the end.' }) })
+
+    await suggest(
+      { mode: 'selection', document: long, selection: { from: 0, to: long.length }, instruction: 'Polish' },
       { apiKey: 'k', model: MODEL, fetchImpl },
     )
 
-    expect(response.edits).toEqual([{ ...target, quote: 'They loose their work', replacement: 'They lose work.', reason: 'r' }])
+    expect((sent[0] as unknown as { max_tokens: number }).max_tokens).toBe(2000 + Math.ceil(long.length / 2))
   })
 
   it('turns a 402 from OpenRouter into a budget error the writer can understand', async () => {
