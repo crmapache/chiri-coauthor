@@ -2,7 +2,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
-import { suggestApiPlugin } from './server/vitePlugin'
+import { suggestApiPlugin } from './server/vitePlugin.js'
 
 const DEFAULT_PORT = 3020
 
