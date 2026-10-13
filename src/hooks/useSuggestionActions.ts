@@ -1,38 +1,44 @@
-import { EditorView } from '@codemirror/view'
+import type { EditorView } from '@codemirror/view'
 import { useMemo } from 'react'
 
 import {
   acceptSuggestions,
+  findSuggestion,
   getSuggestions,
   rejectSuggestions,
-  setActiveSuggestion,
+  revealEffects,
   setHoveredSuggestion,
   showTurn,
 } from '../editor/suggestionState'
 
-/** What the margin and the top bar can do to suggestions. All of it goes through the editor state. */
+/**
+ * What the margin and the top bar can do to suggestions. All of it goes through the editor state,
+ * and every action hands the keyboard back to the text: otherwise the clicked button keeps focus
+ * and Mod-Z or Tab right after it would do nothing.
+ */
 export function useSuggestionActions(view: EditorView | null) {
   return useMemo(() => {
     const allIds = () => (view ? getSuggestions(view.state).items.map((item) => item.id) : [])
 
+    const thenFocus = (done: boolean | undefined) => {
+      if (done) view?.focus()
+    }
+
     return {
-      accept: (id: string) => view && acceptSuggestions(view, [id], { advance: true }),
-      reject: (id: string) => view && rejectSuggestions(view, [id], { advance: true }),
-      acceptAll: () => view && acceptSuggestions(view, allIds()),
-      rejectAll: () => view && rejectSuggestions(view, allIds()),
+      accept: (id: string) => thenFocus(view ? acceptSuggestions(view, [id], { advance: true }) : false),
+      reject: (id: string) => thenFocus(view ? rejectSuggestions(view, [id], { advance: true }) : false),
+      acceptAll: () => thenFocus(view ? acceptSuggestions(view, allIds()) : false),
+      rejectAll: () => thenFocus(view ? rejectSuggestions(view, allIds()) : false),
       hover: (id: string | null) => view?.dispatch({ effects: setHoveredSuggestion.of(id) }),
       showTurn: (id: string, index: number) => view?.dispatch({ effects: showTurn.of({ id, index }) }),
 
       /** Put the cursor on the suggestion and focus the text, so Tab acts on it right away. */
       activate: (id: string) => {
-        const item = view && getSuggestions(view.state).items.find((suggestion) => suggestion.id === id)
+        const item = view && findSuggestion(view.state, id)
 
         if (!view || !item) return
 
-        view.dispatch({
-          selection: { anchor: item.from },
-          effects: [setActiveSuggestion.of(id), EditorView.scrollIntoView(item.from, { y: 'nearest', yMargin: 120 })],
-        })
+        view.dispatch({ selection: { anchor: item.from }, effects: revealEffects(item) })
         view.focus()
       },
     }

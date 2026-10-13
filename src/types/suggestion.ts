@@ -1,9 +1,7 @@
+import type { Turn } from '../../shared/contract'
+
 /** One version of an edit: the instruction that produced it and what the model answered. */
-export type SuggestionTurn = {
-  instruction: string
-  replacement: string
-  reason: string
-}
+export type SuggestionTurn = Turn
 
 /**
  * A proposed edit living in the document as a tracked change. It is never applied until the

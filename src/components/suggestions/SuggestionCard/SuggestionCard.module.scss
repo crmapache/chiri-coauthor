@@ -104,6 +104,12 @@
   margin-left: auto;
 }
 
+.asked {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--ui-size-small);
+}
+
 .reason {
   margin: var(--space-2) 0 0;
   color: var(--ink);
@@ -133,11 +139,7 @@
 }
 
 .form {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
   margin-top: var(--space-2);
-  padding-left: var(--space-2);
   border-radius: var(--radius-sm);
   box-shadow: inset 0 0 0 1px var(--line-strong);
   transition: box-shadow var(--duration-hover) var(--ease);
@@ -145,15 +147,6 @@
   &:focus-within {
     box-shadow: inset 0 0 0 1.5px var(--accent);
   }
-}
-
-.input {
-  flex: 1;
-  min-width: 0;
-  height: 32px;
-  border: 0;
-  outline: none;
-  background: none;
 }
 
 .hint {

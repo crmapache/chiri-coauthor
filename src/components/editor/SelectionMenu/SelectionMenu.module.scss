@@ -1,5 +1,3 @@
-@use '../../../theme/mixins' as *;
-
 @keyframes rise {
   from {
     opacity: 0;
@@ -15,6 +13,7 @@
   z-index: 20;
   top: 0;
   left: 0;
+  visibility: hidden;
   transform: translate(var(--menu-left, 0px), var(--menu-top, 0px));
   padding: var(--space-1);
   border-radius: var(--radius-md);
@@ -31,22 +30,8 @@
   gap: 2px;
 }
 
-.action,
-.ask {
-  @include button-reset;
-  @include interactive;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.ask {
-  color: var(--accent);
+.action {
+  color: var(--ink);
 }
 
 .divider {
@@ -57,23 +42,10 @@
 }
 
 .askForm {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
   width: min(460px, calc(100vw - 48px));
-  padding-left: var(--space-2);
 }
 
 .sparkle {
   flex: none;
   color: var(--accent);
-}
-
-.askInput {
-  flex: 1;
-  min-width: 0;
-  height: 32px;
-  border: 0;
-  outline: none;
-  background: none;
 }

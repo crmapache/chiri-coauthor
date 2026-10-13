@@ -1,6 +1,6 @@
 import type { RefObject } from 'react'
 
-import type { CoauthorStatus } from '../../../hooks/useCoauthor'
+import type { CoauthorStatus } from '../../../types/coauthor'
 
 export type TopBarProps = {
   status: CoauthorStatus

@@ -5,7 +5,8 @@ import type { ButtonProps } from './Button.types'
 
 /**
  * Text button. `primary` for the main action of a surface, `secondary` for actions next to it,
- * `ghost` for quiet inline actions. For icon-only controls use IconButton.
+ * `ghost` for quiet inline actions, `accent` for a quiet action that opens the AI. For icon-only
+ * controls use IconButton.
  */
 export const Button = ({
   variant = 'secondary',

@@ -1,4 +1,5 @@
-export type QuickAction = { id: string; label: string; instruction: string }
+import { shorten } from '../lib/text'
+import type { QuickAction } from '../types/coauthor'
 
 /** One-click asks for a selection. The instruction is what the model sees; the label is for people. */
 export const SELECTION_ACTIONS: QuickAction[] = [
@@ -38,3 +39,8 @@ export const REFINE_ACTIONS: QuickAction[] = [
 ]
 
 export const REVIEW_LABEL = 'Review'
+
+/** Card label for a free-form instruction: "Ask: make it sound confi…". */
+export function askLabel(instruction: string): string {
+  return `Ask: ${shorten(instruction, 24)}`
+}

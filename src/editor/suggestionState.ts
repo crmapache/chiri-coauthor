@@ -8,7 +8,7 @@ import {
   type Text,
   type Transaction,
 } from '@codemirror/state'
-import type { EditorView } from '@codemirror/view'
+import { EditorView } from '@codemirror/view'
 
 import { shownTurnOf, type Suggestion, type SuggestionTurn } from '../types/suggestion'
 
@@ -22,12 +22,15 @@ export type SuggestionsState = {
 
 const EMPTY: SuggestionsState = { items: [], activeId: null, hoveredId: null }
 
-/** Moves a suggestion through a document change. Text typed right at its edges stays outside it. */
+/**
+ * Moves a suggestion through a document change. Text typed right at its edges stays outside it.
+ * An unmoved suggestion keeps its identity, so its card does not re-render on every keystroke.
+ */
 function mapRange(suggestion: Suggestion, mapping: ChangeDesc): Suggestion {
   const from = mapping.mapPos(suggestion.from, 1)
   const to = Math.max(from, mapping.mapPos(suggestion.to, -1))
 
-  return { ...suggestion, from, to }
+  return from === suggestion.from && to === suggestion.to ? suggestion : { ...suggestion, from, to }
 }
 
 /**
@@ -65,8 +68,12 @@ export const showTurn = StateEffect.define<{ id: string; index: number }>()
 export const setActiveSuggestion = StateEffect.define<string | null>()
 export const setHoveredSuggestion = StateEffect.define<string | null>()
 
+function contains(item: Suggestion, position: number): boolean {
+  return position >= item.from && position <= item.to
+}
+
 function suggestionAt(items: Suggestion[], position: number): Suggestion | undefined {
-  return items.find((item) => position >= item.from && position <= item.to)
+  return items.find((item) => contains(item, position))
 }
 
 function withNewItems(state: SuggestionsState, items: Suggestion[]): SuggestionsState {
@@ -155,9 +162,12 @@ export const suggestionsField = StateField.define<SuggestionsState>({
 
     if (tr.selection && !choseActive) {
       const head = tr.selection.main.head
-      const active = suggestionAt(state.items, head)
+      const current = state.items.find((item) => item.id === state.activeId)
 
-      state = { ...state, activeId: active?.id ?? null }
+      // Two suggestions can touch end to start; the one chosen on purpose wins at the seam.
+      if (!current || !contains(current, head)) {
+        state = { ...state, activeId: suggestionAt(state.items, head)?.id ?? null }
+      }
     }
 
     return state
@@ -206,6 +216,23 @@ export const suggestionExtensions = [suggestionsField, suggestionHistory]
 
 export function getSuggestions(state: EditorState): SuggestionsState {
   return state.field(suggestionsField, false) ?? EMPTY
+}
+
+export function findSuggestion(state: EditorState, id: string): Suggestion | undefined {
+  return getSuggestions(state).items.find((item) => item.id === id)
+}
+
+/** The suggestion the cursor is in, if any: the one the writer is working with. */
+export function suggestionAtCursor(state: EditorState): Suggestion | undefined {
+  return suggestionAt(getSuggestions(state).items, state.selection.main.head)
+}
+
+/** Scroll margin that keeps a revealed suggestion clear of the sticky top bar. */
+const REVEAL_MARGIN = 120
+
+/** Effects that make a suggestion active and bring it into view. */
+export function revealEffects(item: Suggestion): StateEffect<unknown>[] {
+  return [setActiveSuggestion.of(item.id), EditorView.scrollIntoView(item.from, { y: 'nearest', yMargin: REVEAL_MARGIN })]
 }
 
 /** After acting on one suggestion, put the cursor on the next one so Tab can keep going. */

@@ -1,6 +1,6 @@
-import type { Notice as NoticeData } from '../../../hooks/useCoauthor'
+import type { NoticeMessage } from '../../../types/coauthor'
 
 export type NoticeProps = {
-  notice: NoticeData | null
+  notice: NoticeMessage | null
   onDismiss: () => void
 }

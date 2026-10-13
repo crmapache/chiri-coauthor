@@ -54,3 +54,8 @@
   @include interactive;
   color: var(--ink-muted);
 }
+
+.accent {
+  @include interactive;
+  color: var(--accent);
+}

@@ -1,24 +1,23 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
 import type { TextRange } from '../shared/contract'
+import { NO_COMMANDS } from './App.constants'
+import styles from './App.module.scss'
+import { SelectionMenu } from './components/editor/SelectionMenu/SelectionMenu'
 import { Notice } from './components/layout/Notice/Notice'
 import { TopBar } from './components/layout/TopBar/TopBar'
-import { SelectionMenu } from './components/editor/SelectionMenu/SelectionMenu'
 import { SuggestionMargin } from './components/suggestions/SuggestionMargin/SuggestionMargin'
 import { Kbd } from './components/ui/Kbd/Kbd'
-import type { QuickAction } from './constants/actions'
 import type { CoauthorCommands } from './editor/coauthorKeymap'
 import { useCoauthor } from './hooks/useCoauthor'
 import { useCoauthorEditor } from './hooks/useCoauthorEditor'
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts'
 import { usePointerSelecting } from './hooks/usePointerSelecting'
 import { useSuggestionActions } from './hooks/useSuggestionActions'
-import { shorten } from './lib/placeEdits'
 import { MOD_KEY_LABEL } from './lib/platform'
+import { isBlank } from './lib/requestText'
 import { SAMPLE_DOCUMENT } from './sample/sampleDocument'
-import styles from './App.module.scss'
-
-const NO_COMMANDS: CoauthorCommands = { openAsk: () => {}, cancelRequest: () => false }
+import type { QuickAction } from './types/coauthor'
 
 /** The whole app: top bar, the document, its margin of suggestions, and the selection menu. */
 export const App = () => {
@@ -33,6 +32,8 @@ export const App = () => {
 
   useGlobalShortcuts(commandsRef)
 
+  const busyId = coauthor.status.kind === 'working' ? coauthor.status.suggestionId : null
+
   // The keymap lives inside CodeMirror; it reaches React through this ref.
   useLayoutEffect(() => {
     commandsRef.current = {
@@ -43,20 +44,24 @@ export const App = () => {
         else askInputRef.current?.focus()
       },
       cancelRequest: coauthor.cancel,
+      isBusy: (id) => id === busyId,
     }
   })
 
-  const working = coauthor.status.kind === 'working'
-  const busyId = coauthor.status.kind === 'working' ? coauthor.status.suggestionId : null
-  const hasSelection = selection.from !== selection.to
+  const selectedText = view ? view.state.sliceDoc(selection.from, selection.to) : ''
+  const hasSelection = !isBlank(selectedText)
+
+  // The ask box belongs to the selection it was opened for; once that selection is gone, so is it.
+  if (askRange && !hasSelection) setAskRange(null)
+
   const askOpen = askRange?.from === selection.from && askRange.to === selection.to
-  const menuVisible = Boolean(view) && hasSelection && !selecting && !working && (hasFocus || askOpen)
+  const menuVisible = Boolean(view) && hasSelection && !selecting && (hasFocus || askOpen)
 
   const handleAction = (action: QuickAction) => coauthor.askAboutSelection(action.instruction, action.label)
 
   const handleAsk = (instruction: string) => {
     setAskRange(null)
-    coauthor.askAboutSelection(instruction, `Ask: ${shorten(instruction, 24)}`)
+    coauthor.askAboutSelection(instruction)
   }
 
   const handleOpenAsk = () => setAskRange(selection)
@@ -109,6 +114,7 @@ export const App = () => {
           <SelectionMenu
             view={view}
             selection={selection}
+            layoutVersion={layoutVersion}
             askOpen={askOpen}
             onOpenAsk={handleOpenAsk}
             onCloseAsk={handleCloseAsk}

@@ -1,8 +1,9 @@
 import type { EditorState } from '@codemirror/state'
 
 import type { AnchoredEdit } from '../../shared/contract'
-import { mapFromRequest, type PendingRequest } from '../editor/pendingState'
+import { plural } from '../lib/text'
 import type { Suggestion } from '../types/suggestion'
+import { mapFromRequest, type PendingRequest } from './pendingState'
 
 export type PlacedEdits = { suggestions: Suggestion[]; stale: number }
 
@@ -15,7 +16,7 @@ export function placeEdits(
   state: EditorState,
   pending: PendingRequest,
   edits: AnchoredEdit[],
-  origin: { label: string; instruction: string },
+  origin: { label: string; instruction: string; offset: number },
   createId: () => string = () => crypto.randomUUID(),
 ): PlacedEdits {
   const suggestions: Suggestion[] = []
@@ -23,7 +24,9 @@ export function placeEdits(
   let stale = 0
 
   for (const edit of edits) {
-    const range = mapFromRequest(state, pending, edit, edit.quote)
+    // Positions come back relative to the part of the document that was sent.
+    const sent = { from: edit.from + origin.offset, to: edit.to + origin.offset }
+    const range = mapFromRequest(state, pending, sent, edit.quote)
 
     if (!range) {
       stale++
@@ -43,10 +46,6 @@ export function placeEdits(
   return { suggestions, stale }
 }
 
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count === 1 ? '' : 's'}`
-}
-
 /** The one line the writer sees after a request: the model's note plus what we had to drop. */
 export function describeOutcome(input: { shown: number; note: string; dropped: number }): string | null {
   const parts: string[] = []
@@ -59,10 +58,4 @@ export function describeOutcome(input: { shown: number; note: string; dropped: n
   }
 
   return parts.length > 0 ? parts.join(' ') : null
-}
-
-export function shorten(text: string, limit = 32): string {
-  const flat = text.replace(/\s+/g, ' ').trim()
-
-  return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat
 }

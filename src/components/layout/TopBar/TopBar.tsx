@@ -1,6 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react'
+import { memo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react'
+
+import { MAX_INSTRUCTION_LENGTH } from '../../../../shared/contract'
 
 import { MOD_KEY_LABEL } from '../../../lib/platform'
+import { plural } from '../../../lib/text'
 import { SparkleIcon } from '../../icons/icons'
 import { Button } from '../../ui/Button/Button'
 import { Kbd } from '../../ui/Kbd/Kbd'
@@ -9,9 +12,11 @@ import type { TopBarProps } from './TopBar.types'
 
 /**
  * Document-level controls: ask about or review the whole text, see what the co-author is doing,
- * and settle all open suggestions at once.
+ * and settle all open suggestions at once. Unlike InstructionForm, an empty field is a valid
+ * submit here: it means "review the document". Memoised because its props rarely change while
+ * the editor re-renders on every keystroke.
  */
-export const TopBar = ({
+export const TopBar = memo(function TopBar({
   status,
   suggestionCount,
   askInputRef,
@@ -19,7 +24,7 @@ export const TopBar = ({
   onCancel,
   onAcceptAll,
   onRejectAll,
-}: TopBarProps) => {
+}: TopBarProps) {
   const [instruction, setInstruction] = useState('')
 
   const working = status.kind === 'working'
@@ -54,10 +59,10 @@ export const TopBar = ({
           onChange={handleInstructionChange}
           onKeyDown={handleKeyDown}
           placeholder="Ask about the whole document…"
-          maxLength={500}
+          maxLength={MAX_INSTRUCTION_LENGTH}
         />
         {!hasInstruction && <Kbd>{MOD_KEY_LABEL}K</Kbd>}
-        <Button type="submit" variant="primary" size="sm" disabled={working}>
+        <Button type="submit" variant="primary" size="sm">
           {hasInstruction ? 'Ask' : 'Review document'}
         </Button>
       </form>
@@ -74,9 +79,7 @@ export const TopBar = ({
         ) : (
           suggestionCount > 0 && (
             <>
-              <span className={styles.count}>
-                {suggestionCount} suggestion{suggestionCount === 1 ? '' : 's'}
-              </span>
+              <span className={styles.count}>{plural(suggestionCount, 'suggestion')}</span>
               <Button variant="ghost" size="sm" onClick={onRejectAll}>
                 Reject all
               </Button>
@@ -89,4 +92,4 @@ export const TopBar = ({
       </div>
     </header>
   )
-}
+})

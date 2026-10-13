@@ -1,7 +1,7 @@
 import { EditorState } from '@codemirror/state'
 import { describe, expect, it } from 'vitest'
 
-import { getPending, pendingField, startPending } from '../editor/pendingState'
+import { getPending, pendingField, startPending } from './pendingState'
 import { describeOutcome, placeEdits } from './placeEdits'
 
 describe('placeEdits', () => {
@@ -18,7 +18,7 @@ describe('placeEdits', () => {
         { from: 8, to: 13, quote: 'three', replacement: 'THREE', reason: 'r' },
         { from: 4, to: 7, quote: 'two', replacement: 'TWO', reason: 'r' },
       ],
-      { label: 'Test', instruction: 'Shout' },
+      { label: 'Test', instruction: 'Shout', offset: 0 },
       () => 'id',
     )
 

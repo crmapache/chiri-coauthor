@@ -61,6 +61,37 @@ class InsertionWidget extends WidgetType {
   }
 }
 
+/**
+ * A removed line break has nothing to strike through, so a writer would not see that accepting
+ * joins two lines. A struck pilcrow at the end of the line makes it visible.
+ */
+class RemovedLineBreakWidget extends WidgetType {
+  constructor(
+    readonly suggestionId: string,
+    readonly emphasis: Emphasis,
+  ) {
+    super()
+  }
+
+  eq(other: RemovedLineBreakWidget): boolean {
+    return other.suggestionId === this.suggestionId && other.emphasis === this.emphasis
+  }
+
+  toDOM(): HTMLElement {
+    const element = document.createElement('span')
+
+    element.className = `cm-suggestion-removed cm-suggestion-${this.emphasis}`
+    element.textContent = '¶'
+    element.setAttribute(SUGGESTION_ID_ATTRIBUTE, this.suggestionId)
+
+    return element
+  }
+
+  ignoreEvent(): boolean {
+    return false
+  }
+}
+
 function markFor(kind: 'same' | 'removed', suggestionId: string, emphasis: Emphasis) {
   const role = kind === 'removed' ? 'cm-suggestion-removed' : 'cm-suggestion-kept'
 
@@ -92,6 +123,15 @@ function decorateSuggestion(suggestion: Suggestion, emphasis: Emphasis): Range<D
     if (end === position) continue
 
     ranges.push(markFor(segment.kind, suggestion.id, emphasis).range(position, end))
+
+    if (segment.kind === 'removed') {
+      for (let index = segment.text.indexOf('\n'); index !== -1; index = segment.text.indexOf('\n', index + 1)) {
+        const lineBreak = new RemovedLineBreakWidget(suggestion.id, emphasis)
+
+        ranges.push(Decoration.widget({ widget: lineBreak, side: -1 }).range(position + index))
+      }
+    }
+
     position = end
   }
 

@@ -1,7 +1,14 @@
-import type { Suggestion } from '../../../types/suggestion'
+import type { SuggestionTurn } from '../../../types/suggestion'
 
+/**
+ * Only the fields a card shows. Positions are left out on purpose: they change on every keystroke
+ * above the suggestion, and the card does not depend on them.
+ */
 export type SuggestionCardProps = {
-  suggestion: Suggestion
+  id: string
+  label: string
+  turns: SuggestionTurn[]
+  shownTurn: number
   active: boolean
   /** A refinement of this very card is in flight. */
   busy: boolean

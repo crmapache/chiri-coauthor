@@ -9,12 +9,23 @@ export type CoauthorCommands = {
   openAsk: () => void
   /** `Escape`: stop the request in flight. Returns false when there was nothing to stop. */
   cancelRequest: () => boolean
+  /** A suggestion being rewritten right now must not be accepted or rejected mid-flight. */
+  isBusy: (id: string) => boolean
 }
 
-function withActive(view: EditorView, run: (id: string) => boolean): boolean {
+function withActive(
+  view: EditorView,
+  commands: { current: CoauthorCommands },
+  run: (id: string) => boolean,
+): boolean {
   const { activeId } = getSuggestions(view.state)
 
-  return activeId ? run(activeId) : false
+  if (!activeId) return false
+
+  // Swallow the key while the card is rewriting, so it neither acts nor moves focus away.
+  if (commands.current.isBusy(activeId)) return true
+
+  return run(activeId)
 }
 
 /**
@@ -27,11 +38,11 @@ export function coauthorKeymap(commands: { current: CoauthorCommands }) {
     keymap.of([
       {
         key: 'Tab',
-        run: (view) => withActive(view, (id) => acceptSuggestions(view, [id], { advance: true })),
+        run: (view) => withActive(view, commands, (id) => acceptSuggestions(view, [id], { advance: true })),
       },
       {
         key: 'Shift-Tab',
-        run: (view) => withActive(view, (id) => rejectSuggestions(view, [id], { advance: true })),
+        run: (view) => withActive(view, commands, (id) => rejectSuggestions(view, [id], { advance: true })),
       },
       {
         key: 'Mod-k',
