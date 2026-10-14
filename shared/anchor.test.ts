@@ -14,7 +14,11 @@ describe('locateQuote', () => {
   it('finds an exact quote', () => {
     const result = locateQuote(DOC, 'field teams')
 
-    expect(result).toEqual({ ok: true, from: DOC.indexOf('field teams'), to: DOC.indexOf('field teams') + 11 })
+    expect(result).toEqual({
+      ok: true,
+      from: DOC.indexOf('field teams'),
+      to: DOC.indexOf('field teams') + 11,
+    })
   })
 
   it('tolerates collapsed whitespace and straight quotes, mapping back to the real text', () => {
@@ -37,7 +41,10 @@ describe('locateQuote', () => {
   })
 
   it('rejects quotes outside the allowed range and empty quotes', () => {
-    expect(locateQuote(DOC, 'Launch', { from: 20, to: 40 })).toEqual({ ok: false, reason: 'not-found' })
+    expect(locateQuote(DOC, 'Launch', { from: 20, to: 40 })).toEqual({
+      ok: false,
+      reason: 'not-found',
+    })
     expect(locateQuote(DOC, '   ')).toEqual({ ok: false, reason: 'empty' })
   })
 })
@@ -45,7 +52,11 @@ describe('locateQuote', () => {
 describe('anchorEdits', () => {
   it('places edits, sorts them, and reports the ones it could not place', () => {
     const { edits, failures } = anchorEdits(DOC, [
-      { quote: 'every 5 minutes', replacement: 'every five minutes', reason: 'Spell out small numbers.' },
+      {
+        quote: 'every 5 minutes',
+        replacement: 'every five minutes',
+        reason: 'Spell out small numbers.',
+      },
       { quote: 'Launch notes', replacement: 'Release notes', reason: 'Matches the product term.' },
       { quote: 'not in the text', replacement: 'x', reason: 'r' },
       { quote: 'field teams', replacement: 'field teams', reason: 'no-op' },
@@ -74,13 +85,17 @@ describe('anchorEdits', () => {
   })
 
   it('keeps the line breaks of the real text when the quote only matched loosely', () => {
-    const { edits } = anchorEdits('- one\n- two\n', [{ quote: '- one - two', replacement: '- One - two', reason: 'r' }])
+    const { edits } = anchorEdits('- one\n- two\n', [
+      { quote: '- one - two', replacement: '- One - two', reason: 'r' },
+    ])
 
     expect(edits[0]).toMatchObject({ quote: '- one\n- two', replacement: '- One\n- two' })
   })
 
   it('cuts an over-long reason so it can be sent back when refining', () => {
-    const { edits } = anchorEdits(DOC, [{ quote: 'field teams', replacement: 'field crews', reason: 'x'.repeat(1000) }])
+    const { edits } = anchorEdits(DOC, [
+      { quote: 'field teams', replacement: 'field crews', reason: 'x'.repeat(1000) },
+    ])
 
     expect(edits[0]?.reason.length).toBeLessThanOrEqual(MAX_REASON_LENGTH)
   })

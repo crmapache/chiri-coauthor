@@ -62,11 +62,19 @@ export const SuggestionCard = memo(function SuggestionCard({
 
         {versions > 1 && (
           <span className={styles.versions}>
-            <IconButton title="Previous version" onClick={handlePrevious} disabled={shownTurn === 0 || busy}>
+            <IconButton
+              title="Previous version"
+              onClick={handlePrevious}
+              disabled={shownTurn === 0 || busy}
+            >
               <ChevronLeftIcon width={14} height={14} />
             </IconButton>
             {shownTurn + 1}/{versions}
-            <IconButton title="Next version" onClick={handleNext} disabled={shownTurn === versions - 1 || busy}>
+            <IconButton
+              title="Next version"
+              onClick={handleNext}
+              disabled={shownTurn === versions - 1 || busy}
+            >
               <ChevronRightIcon width={14} height={14} />
             </IconButton>
           </span>
@@ -76,7 +84,12 @@ export const SuggestionCard = memo(function SuggestionCard({
           <IconButton tone="accept" title="Accept (Tab)" onClick={handleAccept} disabled={busy}>
             <CheckIcon />
           </IconButton>
-          <IconButton tone="reject" title="Reject (Shift+Tab)" onClick={handleReject} disabled={busy}>
+          <IconButton
+            tone="reject"
+            title="Reject (Shift+Tab)"
+            onClick={handleReject}
+            disabled={busy}
+          >
             <CloseIcon />
           </IconButton>
         </span>
@@ -101,7 +114,11 @@ export const SuggestionCard = memo(function SuggestionCard({
             ))}
           </div>
 
-          <InstructionForm className={styles.form} placeholder="Ask for a change…" onSubmit={handleRefine} />
+          <InstructionForm
+            className={styles.form}
+            placeholder="Ask for a change…"
+            onSubmit={handleRefine}
+          />
 
           <p className={styles.hint}>
             <Kbd>Tab</Kbd> accept <Kbd>⇧ Tab</Kbd> reject

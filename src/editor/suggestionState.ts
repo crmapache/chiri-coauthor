@@ -39,7 +39,10 @@ function mapRange(suggestion: Suggestion, mapping: ChangeDesc): Suggestion {
  * undo and anything else that rewrites the span.
  */
 function stillMatches(suggestion: Suggestion, doc: Text): boolean {
-  return suggestion.to <= doc.length && doc.sliceString(suggestion.from, suggestion.to) === suggestion.original
+  return (
+    suggestion.to <= doc.length &&
+    doc.sliceString(suggestion.from, suggestion.to) === suggestion.original
+  )
 }
 
 function overlaps(left: Suggestion, right: Suggestion): boolean {
@@ -86,12 +89,19 @@ function withNewItems(state: SuggestionsState, items: Suggestion[]): Suggestions
   }
 }
 
-function applyEffect(state: SuggestionsState, effect: StateEffect<unknown>, doc: Text): SuggestionsState {
+function applyEffect(
+  state: SuggestionsState,
+  effect: StateEffect<unknown>,
+  doc: Text,
+): SuggestionsState {
   if (effect.is(addSuggestions)) {
     const incoming = effect.value.filter((item) => stillMatches(item, doc))
     const kept = state.items.filter((item) => !incoming.some((next) => overlaps(item, next)))
 
-    return withNewItems(state, [...kept, ...incoming].sort((left, right) => left.from - right.from))
+    return withNewItems(
+      state,
+      [...kept, ...incoming].sort((left, right) => left.from - right.from),
+    )
   }
 
   if (effect.is(restoreSuggestions)) {
@@ -101,7 +111,10 @@ function applyEffect(state: SuggestionsState, effect: StateEffect<unknown>, doc:
         !state.items.some((existing) => existing.id === item.id || overlaps(existing, item)),
     )
 
-    return withNewItems(state, [...state.items, ...restorable].sort((left, right) => left.from - right.from))
+    return withNewItems(
+      state,
+      [...state.items, ...restorable].sort((left, right) => left.from - right.from),
+    )
   }
 
   if (effect.is(removeSuggestions)) {
@@ -232,7 +245,10 @@ const REVEAL_MARGIN = 120
 
 /** Effects that make a suggestion active and bring it into view. */
 export function revealEffects(item: Suggestion): StateEffect<unknown>[] {
-  return [setActiveSuggestion.of(item.id), EditorView.scrollIntoView(item.from, { y: 'nearest', yMargin: REVEAL_MARGIN })]
+  return [
+    setActiveSuggestion.of(item.id),
+    EditorView.scrollIntoView(item.from, { y: 'nearest', yMargin: REVEAL_MARGIN }),
+  ]
 }
 
 /** After acting on one suggestion, put the cursor on the next one so Tab can keep going. */
@@ -261,7 +277,11 @@ function cursorOnNext(state: EditorState, handled: Suggestion[], insertedDelta: 
  * Applies suggestions to the text in one transaction, so one undo reverts them all and brings the
  * suggestions back.
  */
-export function acceptSuggestions(view: EditorView, ids: string[], options = { advance: false }): boolean {
+export function acceptSuggestions(
+  view: EditorView,
+  ids: string[],
+  options = { advance: false },
+): boolean {
   const items = getSuggestions(view.state).items.filter((item) => ids.includes(item.id))
 
   if (items.length === 0) return false
@@ -271,7 +291,10 @@ export function acceptSuggestions(view: EditorView, ids: string[], options = { a
     to: item.to,
     insert: shownTurnOf(item).replacement,
   }))
-  const delta = changes.reduce((total, change) => total + change.insert.length - (change.to - change.from), 0)
+  const delta = changes.reduce(
+    (total, change) => total + change.insert.length - (change.to - change.from),
+    0,
+  )
   const advance = options.advance ? cursorOnNext(view.state, items, delta) : {}
 
   view.dispatch({
@@ -285,7 +308,11 @@ export function acceptSuggestions(view: EditorView, ids: string[], options = { a
   return true
 }
 
-export function rejectSuggestions(view: EditorView, ids: string[], options = { advance: false }): boolean {
+export function rejectSuggestions(
+  view: EditorView,
+  ids: string[],
+  options = { advance: false },
+): boolean {
   const items = getSuggestions(view.state).items.filter((item) => ids.includes(item.id))
 
   if (items.length === 0) return false

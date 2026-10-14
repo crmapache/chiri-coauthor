@@ -5,7 +5,11 @@ import { diffForDisplay } from './wordDiff'
 function render(original: string, replacement: string): string {
   return diffForDisplay(original, replacement)
     .map((segment) =>
-      segment.kind === 'same' ? segment.text : segment.kind === 'removed' ? `[-${segment.text}-]` : `{+${segment.text}+}`,
+      segment.kind === 'same'
+        ? segment.text
+        : segment.kind === 'removed'
+          ? `[-${segment.text}-]`
+          : `{+${segment.text}+}`,
     )
     .join('')
 }

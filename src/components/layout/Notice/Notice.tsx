@@ -20,7 +20,12 @@ export const Notice = ({ notice, onDismiss }: NoticeProps) => {
   if (!notice) return null
 
   return (
-    <div key={notice.id} className={clsx(styles.notice, styles[notice.tone])} role="status" data-testid="notice">
+    <div
+      key={notice.id}
+      className={clsx(styles.notice, styles[notice.tone])}
+      role="status"
+      data-testid="notice"
+    >
       <span>{notice.text}</span>
       <IconButton title="Dismiss" onClick={onDismiss}>
         <CloseIcon width={14} height={14} />

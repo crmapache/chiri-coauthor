@@ -25,12 +25,15 @@ export function useSuggestionActions(view: EditorView | null) {
     }
 
     return {
-      accept: (id: string) => thenFocus(view ? acceptSuggestions(view, [id], { advance: true }) : false),
-      reject: (id: string) => thenFocus(view ? rejectSuggestions(view, [id], { advance: true }) : false),
+      accept: (id: string) =>
+        thenFocus(view ? acceptSuggestions(view, [id], { advance: true }) : false),
+      reject: (id: string) =>
+        thenFocus(view ? rejectSuggestions(view, [id], { advance: true }) : false),
       acceptAll: () => thenFocus(view ? acceptSuggestions(view, allIds()) : false),
       rejectAll: () => thenFocus(view ? rejectSuggestions(view, allIds()) : false),
       hover: (id: string | null) => view?.dispatch({ effects: setHoveredSuggestion.of(id) }),
-      showTurn: (id: string, index: number) => view?.dispatch({ effects: showTurn.of({ id, index }) }),
+      showTurn: (id: string, index: number) =>
+        view?.dispatch({ effects: showTurn.of({ id, index }) }),
 
       /** Put the cursor on the suggestion and focus the text, so Tab acts on it right away. */
       activate: (id: string) => {

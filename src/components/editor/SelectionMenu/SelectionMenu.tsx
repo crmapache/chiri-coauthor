@@ -77,12 +77,23 @@ export const SelectionMenu = ({
       ) : (
         <div className={styles.actions} onMouseDown={handleKeepFocus}>
           {SELECTION_ACTIONS.map((action) => (
-            <Button key={action.id} variant="ghost" size="sm" className={styles.action} onClick={() => onAction(action)}>
+            <Button
+              key={action.id}
+              variant="ghost"
+              size="sm"
+              className={styles.action}
+              onClick={() => onAction(action)}
+            >
               {action.label}
             </Button>
           ))}
           <span className={styles.divider} />
-          <Button variant="accent" size="sm" iconStart={<SparkleIcon width={14} height={14} />} onClick={onOpenAsk}>
+          <Button
+            variant="accent"
+            size="sm"
+            iconStart={<SparkleIcon width={14} height={14} />}
+            onClick={onOpenAsk}
+          >
             Ask <Kbd>{MOD_KEY_LABEL}K</Kbd>
           </Button>
         </div>

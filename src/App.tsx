@@ -57,7 +57,8 @@ export const App = () => {
   const askOpen = askRange?.from === selection.from && askRange.to === selection.to
   const menuVisible = Boolean(view) && hasSelection && !selecting && (hasFocus || askOpen)
 
-  const handleAction = (action: QuickAction) => coauthor.askAboutSelection(action.instruction, action.label)
+  const handleAction = (action: QuickAction) =>
+    coauthor.askAboutSelection(action.instruction, action.label)
 
   const handleAsk = (instruction: string) => {
     setAskRange(null)
@@ -86,8 +87,8 @@ export const App = () => {
 
       <main className={styles.workspace}>
         <p className={styles.hint}>
-          Select text for suggestions, or press <Kbd>{MOD_KEY_LABEL}K</Kbd> to ask. Accept with <Kbd>Tab</Kbd>,
-          reject with <Kbd>⇧ Tab</Kbd>, undo with <Kbd>{MOD_KEY_LABEL}Z</Kbd>.
+          Select text for suggestions, or press <Kbd>{MOD_KEY_LABEL}K</Kbd> to ask. Accept with{' '}
+          <Kbd>Tab</Kbd>, reject with <Kbd>⇧ Tab</Kbd>, undo with <Kbd>{MOD_KEY_LABEL}Z</Kbd>.
         </p>
 
         <article className={styles.paper} onPointerDown={handlePointerDown}>
@@ -125,8 +126,8 @@ export const App = () => {
 
         <footer className={styles.footer}>
           <span>
-            {coauthor.modelName ? `${coauthor.modelName} via OpenRouter` : 'AI via OpenRouter'}. Your draft is
-            saved in this browser.
+            {coauthor.modelName ? `${coauthor.modelName} via OpenRouter` : 'AI via OpenRouter'}.
+            Your draft is saved in this browser.
           </span>
           <button type="button" className={styles.reset} onClick={handleResetSample}>
             Restore the sample draft

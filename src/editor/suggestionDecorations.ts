@@ -125,7 +125,11 @@ function decorateSuggestion(suggestion: Suggestion, emphasis: Emphasis): Range<D
     ranges.push(markFor(segment.kind, suggestion.id, emphasis).range(position, end))
 
     if (segment.kind === 'removed') {
-      for (let index = segment.text.indexOf('\n'); index !== -1; index = segment.text.indexOf('\n', index + 1)) {
+      for (
+        let index = segment.text.indexOf('\n');
+        index !== -1;
+        index = segment.text.indexOf('\n', index + 1)
+      ) {
         const lineBreak = new RemovedLineBreakWidget(suggestion.id, emphasis)
 
         ranges.push(Decoration.widget({ widget: lineBreak, side: -1 }).range(position + index))

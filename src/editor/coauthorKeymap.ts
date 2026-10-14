@@ -38,11 +38,13 @@ export function coauthorKeymap(commands: { current: CoauthorCommands }) {
     keymap.of([
       {
         key: 'Tab',
-        run: (view) => withActive(view, commands, (id) => acceptSuggestions(view, [id], { advance: true })),
+        run: (view) =>
+          withActive(view, commands, (id) => acceptSuggestions(view, [id], { advance: true })),
       },
       {
         key: 'Shift-Tab',
-        run: (view) => withActive(view, commands, (id) => rejectSuggestions(view, [id], { advance: true })),
+        run: (view) =>
+          withActive(view, commands, (id) => rejectSuggestions(view, [id], { advance: true })),
       },
       {
         key: 'Mod-k',

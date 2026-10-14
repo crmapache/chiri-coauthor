@@ -75,7 +75,8 @@ const LIST_ITEM = lineStartingWith(SAMPLE_DOCUMENT, '- have there')
 const OPEN_QUESTIONS = lineStartingWith(SAMPLE_DOCUMENT, 'We still need')
 const CLEAN = 'The first version will let technicians:'
 
-const PARTIAL = 'basically non-existent, and when the app can\'t connect they loose whatever they were typing'
+const PARTIAL =
+  "basically non-existent, and when the app can't connect they loose whatever they were typing"
 
 const CLEAN_DOCUMENT = `# Weekly update
 
@@ -97,33 +98,61 @@ export const CASES: EvalCase[] = [
   {
     id: 'grammar-paragraph',
     description: 'Fix grammar in a paragraph with two seeded errors',
-    request: selection(SAMPLE_DOCUMENT, WHY, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      WHY,
+      'Fix spelling, grammar and punctuation only. Change nothing else.',
+    ),
     checks: [lacks('they loose'), lacks('field has been'), contains('40%'), minimal(WHY, 0.12)],
   },
   {
     id: 'partial-selection',
     description: 'Fix grammar in half a sentence without touching the rest',
-    request: selection(SAMPLE_DOCUMENT, PARTIAL, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      PARTIAL,
+      'Fix spelling, grammar and punctuation only. Change nothing else.',
+    ),
     checks: [lacks('they loose'), contains('basically'), minimal(PARTIAL, 0.12)],
   },
   {
     id: 'add-without-inventing',
     description: 'Add a sentence about impact without making up numbers',
-    request: selection(SAMPLE_DOCUMENT, WHY, 'Add one sentence about the impact we expect from this launch.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      WHY,
+      'Add one sentence about the impact we expect from this launch.',
+    ),
     checks: [inventsNoNumbers(SAMPLE_DOCUMENT), contains('40%')],
   },
   {
     id: 'improve-keeps-facts',
     description: 'Improve a paragraph, keep every fact',
-    request: selection(SAMPLE_DOCUMENT, TIMELINE, 'Improve this passage: make it clearer and more direct without changing its meaning.'),
-    checks: [contains('March 3'), contains('three customers'), contains('April'), inventsNoNumbers(SAMPLE_DOCUMENT)],
+    request: selection(
+      SAMPLE_DOCUMENT,
+      TIMELINE,
+      'Improve this passage: make it clearer and more direct without changing its meaning.',
+    ),
+    checks: [
+      contains('March 3'),
+      contains('three customers'),
+      contains('April'),
+      inventsNoNumbers(SAMPLE_DOCUMENT),
+    ],
   },
   {
     id: 'shorten-keeps-facts',
     description: 'Shorten a paragraph without losing its dates',
-    request: selection(SAMPLE_DOCUMENT, TIMELINE, 'Make this passage noticeably shorter. Keep every fact and the main point.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      TIMELINE,
+      'Make this passage noticeably shorter. Keep every fact and the main point.',
+    ),
     checks: [
-      { name: 'at most 85% of the original length', passes: (result) => result.passage.length <= TIMELINE.length * 0.85 },
+      {
+        name: 'at most 85% of the original length',
+        passes: (result) => result.passage.length <= TIMELINE.length * 0.85,
+      },
       contains('March 3'),
       contains('April'),
     ],
@@ -137,7 +166,11 @@ export const CASES: EvalCase[] = [
   {
     id: 'list-item-markdown',
     description: 'Fix a list item and keep its Markdown marker',
-    request: selection(SAMPLE_DOCUMENT, LIST_ITEM, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      LIST_ITEM,
+      'Fix spelling, grammar and punctuation only. Change nothing else.',
+    ),
     checks: [
       contains('their changes'),
       { name: 'still a list item', passes: (result) => result.passage.startsWith('- ') },
@@ -146,19 +179,31 @@ export const CASES: EvalCase[] = [
   {
     id: 'link-preserved',
     description: 'Rewrite a sentence that contains a link without breaking it',
-    request: selection(SAMPLE_DOCUMENT, OPEN_QUESTIONS, 'Make the tone warmer and more conversational.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      OPEN_QUESTIONS,
+      'Make the tone warmer and more conversational.',
+    ),
     checks: [contains('(https://example.com/offline-design)'), contains('Android')],
   },
   {
     id: 'clean-sentence',
     description: 'Ask to fix grammar where there is nothing to fix',
-    request: selection(SAMPLE_DOCUMENT, CLEAN, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    request: selection(
+      SAMPLE_DOCUMENT,
+      CLEAN,
+      'Fix spelling, grammar and punctuation only. Change nothing else.',
+    ),
     checks: [{ name: 'proposes nothing', passes: (result) => result.editCount === 0 }],
   },
   {
     id: 'spanish-stays-spanish',
     description: 'Fix grammar in Spanish without switching language',
-    request: selection(SPANISH, SPANISH_PARAGRAPH, 'Fix spelling, grammar and punctuation only. Change nothing else.'),
+    request: selection(
+      SPANISH,
+      SPANISH_PARAGRAPH,
+      'Fix spelling, grammar and punctuation only. Change nothing else.',
+    ),
     checks: [lacks('habían muchas'), lacks('nadie sabia'), contains('presupuesto'), lacks(' the ')],
   },
   {
@@ -173,7 +218,10 @@ export const CASES: EvalCase[] = [
             (error) => !result.document.includes(error),
           ).length >= 3,
       },
-      { name: 'between 2 and 6 edits', passes: (result) => result.editCount >= 2 && result.editCount <= 6 },
+      {
+        name: 'between 2 and 6 edits',
+        passes: (result) => result.editCount >= 2 && result.editCount <= 6,
+      },
       contains('March 3'),
     ],
   },
@@ -193,7 +241,8 @@ export const CASES: EvalCase[] = [
     request: {
       mode: 'document',
       document: SAMPLE_DOCUMENT,
-      instruction: "Say 'field engineers' instead of 'technicians' everywhere. Change nothing else.",
+      instruction:
+        "Say 'field engineers' instead of 'technicians' everywhere. Change nothing else.",
     },
     checks: [
       { name: 'no "technician" left', passes: (result) => !/technician/i.test(result.document) },
@@ -203,9 +252,16 @@ export const CASES: EvalCase[] = [
   {
     id: 'review-with-instruction',
     description: 'Whole-document instruction still yields targeted edits',
-    request: { mode: 'document', document: SAMPLE_DOCUMENT, instruction: 'Make it read more confidently.' },
+    request: {
+      mode: 'document',
+      document: SAMPLE_DOCUMENT,
+      instruction: 'Make it read more confidently.',
+    },
     checks: [
-      { name: 'between 1 and 6 edits', passes: (result) => result.editCount >= 1 && result.editCount <= 6 },
+      {
+        name: 'between 1 and 6 edits',
+        passes: (result) => result.editCount >= 1 && result.editCount <= 6,
+      },
       contains('40%'),
       contains('March 3'),
     ],
@@ -227,6 +283,12 @@ export const CASES: EvalCase[] = [
       ],
       feedback: 'Keep the 40% support-ticket number, it is the strongest argument.',
     },
-    checks: [contains('40%'), { name: 'still shorter than the original', passes: (result) => result.passage.length < WHY.length }],
+    checks: [
+      contains('40%'),
+      {
+        name: 'still shorter than the original',
+        passes: (result) => result.passage.length < WHY.length,
+      },
+    ],
   },
 ]

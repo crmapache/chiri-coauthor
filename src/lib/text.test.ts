@@ -4,7 +4,9 @@ import { plural, shorten } from './text'
 
 describe('shorten', () => {
   it('cuts long text with an ellipsis and keeps emoji whole', () => {
-    expect(shorten('Add more fun, please!!🎉 and make it lively', 24)).toBe('Add more fun, please!!🎉…')
+    expect(shorten('Add more fun, please!!🎉 and make it lively', 24)).toBe(
+      'Add more fun, please!!🎉…',
+    )
     expect(shorten('short', 24)).toBe('short')
   })
 })

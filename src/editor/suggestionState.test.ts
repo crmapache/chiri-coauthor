@@ -144,7 +144,12 @@ describe('suggestion state', () => {
     harness.undo()
 
     expect(harness.text()).toBe(DOC)
-    expect(harness.items().map((item) => item.id).sort()).toEqual(['a', 'b'])
+    expect(
+      harness
+        .items()
+        .map((item) => item.id)
+        .sort(),
+    ).toEqual(['a', 'b'])
   })
 
   it('lets a newer suggestion replace an older one on the same text', () => {
@@ -200,6 +205,8 @@ describe('pending request mapping', () => {
 
     const pending = getPending(harness.state)!
 
-    expect(mapFromRequest(harness.state, pending, { from: lazyAt, to: lazyAt + 4 }, 'lazy')).toBeNull()
+    expect(
+      mapFromRequest(harness.state, pending, { from: lazyAt, to: lazyAt + 4 }, 'lazy'),
+    ).toBeNull()
   })
 })

@@ -4,7 +4,10 @@ import { documentWindow, expandToWords, isBlank } from './requestText'
 
 describe('documentWindow', () => {
   it('sends a short document whole', () => {
-    expect(documentWindow('short text', { from: 0, to: 5 })).toEqual({ text: 'short text', offset: 0 })
+    expect(documentWindow('short text', { from: 0, to: 5 })).toEqual({
+      text: 'short text',
+      offset: 0,
+    })
   })
 
   it('sends a window around the passage of a long document, starting on a line', () => {
@@ -16,7 +19,9 @@ describe('documentWindow', () => {
     const window = documentWindow(document, range, 2000)
 
     expect(window.text.length).toBeLessThanOrEqual(2000)
-    expect(window.text.slice(range.from - window.offset, range.to - window.offset)).toBe(document.slice(range.from, range.to))
+    expect(window.text.slice(range.from - window.offset, range.to - window.offset)).toBe(
+      document.slice(range.from, range.to),
+    )
     expect(window.offset === 0 || document[window.offset - 1] === '\n').toBe(true)
   })
 })

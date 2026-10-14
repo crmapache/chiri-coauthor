@@ -30,7 +30,8 @@ export const TopBar = memo(function TopBar({
   const working = status.kind === 'working'
   const hasInstruction = instruction.trim().length > 0
 
-  const handleInstructionChange = (event: ChangeEvent<HTMLInputElement>) => setInstruction(event.target.value)
+  const handleInstructionChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setInstruction(event.target.value)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

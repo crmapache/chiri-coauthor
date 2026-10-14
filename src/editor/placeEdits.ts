@@ -37,7 +37,9 @@ export function placeEdits(
       id: createId(),
       ...range,
       original: edit.quote,
-      turns: [{ instruction: origin.instruction, replacement: edit.replacement, reason: edit.reason }],
+      turns: [
+        { instruction: origin.instruction, replacement: edit.replacement, reason: edit.reason },
+      ],
       shownTurn: 0,
       label: origin.label,
     })
@@ -47,14 +49,20 @@ export function placeEdits(
 }
 
 /** The one line the writer sees after a request: the model's note plus what we had to drop. */
-export function describeOutcome(input: { shown: number; note: string; dropped: number }): string | null {
+export function describeOutcome(input: {
+  shown: number
+  note: string
+  dropped: number
+}): string | null {
   const parts: string[] = []
 
   if (input.note) parts.push(input.note)
   else if (input.shown === 0) parts.push('No changes suggested.')
 
   if (input.dropped > 0) {
-    parts.push(`${plural(input.dropped, 'suggestion')} skipped because the text changed or could not be matched.`)
+    parts.push(
+      `${plural(input.dropped, 'suggestion')} skipped because the text changed or could not be matched.`,
+    )
   }
 
   return parts.length > 0 ? parts.join(' ') : null

@@ -6,7 +6,8 @@ export const SELECTION_ACTIONS: QuickAction[] = [
   {
     id: 'improve',
     label: 'Improve',
-    instruction: 'Improve this passage: make it clearer and more direct without changing its meaning.',
+    instruction:
+      'Improve this passage: make it clearer and more direct without changing its meaning.',
   },
   {
     id: 'shorten',

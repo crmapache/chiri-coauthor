@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
 import { anchorEdits, clampReason, type AnchorFailure, type RawEdit } from '../shared/anchor.js'
-import type { AnchoredEdit, SuggestRequest, SuggestResponse, TextRange } from '../shared/contract.js'
+import type {
+  AnchoredEdit,
+  SuggestRequest,
+  SuggestResponse,
+  TextRange,
+} from '../shared/contract.js'
 import { ApiError } from './errors.js'
 import type { ModelProfile } from './models.js'
 import { complete, type Completion } from './openrouter.js'
@@ -96,7 +101,9 @@ function placeRefinement(request: SuggestRequest & { mode: 'refine' }, output: M
 
   for (const edit of [...placed.edits].reverse()) {
     replacement =
-      replacement.slice(0, edit.from - target.from) + edit.replacement + replacement.slice(edit.to - target.from)
+      replacement.slice(0, edit.from - target.from) +
+      edit.replacement +
+      replacement.slice(edit.to - target.from)
   }
 
   if (replacement === passage) {
@@ -163,7 +170,10 @@ export async function suggest(request: SuggestRequest, deps: SuggestDeps): Promi
 
     // A cut-off answer would be cut off again on retry; say what to do instead of paying twice.
     if (completion.finishReason === 'length') {
-      throw new ApiError('model-output', 'That was too much text for one answer. Try a shorter selection.')
+      throw new ApiError(
+        'model-output',
+        'That was too much text for one answer. Try a shorter selection.',
+      )
     }
 
     const output = parseModelOutput(completion.content)

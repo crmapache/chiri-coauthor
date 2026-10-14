@@ -13,7 +13,13 @@ import {
 import { askLabel, REVIEW_LABEL } from '../constants/actions'
 import { endPending, getPending, startPending, type PendingRequest } from '../editor/pendingState'
 import { describeOutcome, placeEdits } from '../editor/placeEdits'
-import { addSuggestions, addTurn, findSuggestion, revealEffects, suggestionAtCursor } from '../editor/suggestionState'
+import {
+  addSuggestions,
+  addTurn,
+  findSuggestion,
+  revealEffects,
+  suggestionAtCursor,
+} from '../editor/suggestionState'
 import { requestSuggestions, SuggestError } from '../lib/api'
 import { documentWindow, expandToWords, isBlank } from '../lib/requestText'
 import type { CoauthorStatus, NoticeMessage } from '../types/coauthor'
@@ -100,7 +106,10 @@ export function useCoauthor(view: EditorView | null) {
       } catch (error) {
         if (error instanceof SuggestError && error.code === 'aborted') return
 
-        showNotice('error', error instanceof SuggestError ? error.message : 'Something went wrong. Try again.')
+        showNotice(
+          'error',
+          error instanceof SuggestError ? error.message : 'Something went wrong. Try again.',
+        )
       } finally {
         if (controllerRef.current === controller) {
           controllerRef.current = null
@@ -126,10 +135,16 @@ export function useCoauthor(view: EditorView | null) {
       const [first] = suggestions
 
       if (first) {
-        editor.dispatch({ effects: [addSuggestions.of(suggestions), ...activateUnlessBusyElsewhere(editor, first)] })
+        editor.dispatch({
+          effects: [addSuggestions.of(suggestions), ...activateUnlessBusyElsewhere(editor, first)],
+        })
       }
 
-      const text = describeOutcome({ shown: suggestions.length, note: response.note, dropped: response.skipped + stale })
+      const text = describeOutcome({
+        shown: suggestions.length,
+        note: response.note,
+        dropped: response.skipped + stale,
+      })
 
       if (text) showNotice('info', text)
     },
@@ -250,7 +265,10 @@ export function useCoauthor(view: EditorView | null) {
             const [edit] = response.edits
 
             if (!current) {
-              showNotice('info', 'The text changed while the co-author was rewriting, so the suggestion was dropped.')
+              showNotice(
+                'info',
+                'The text changed while the co-author was rewriting, so the suggestion was dropped.',
+              )
               return
             }
 
@@ -261,7 +279,14 @@ export function useCoauthor(view: EditorView | null) {
 
             view.dispatch({
               effects: [
-                addTurn.of({ id, turn: { instruction: feedback, replacement: edit.replacement, reason: edit.reason } }),
+                addTurn.of({
+                  id,
+                  turn: {
+                    instruction: feedback,
+                    replacement: edit.replacement,
+                    reason: edit.reason,
+                  },
+                }),
                 ...activateUnlessBusyElsewhere(view, current),
               ],
             })

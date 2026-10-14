@@ -36,7 +36,9 @@ const apiKey = process.env.OPENROUTER_API_KEY
 if (!apiKey) throw new Error('Set OPENROUTER_API_KEY (see .env.example)')
 
 const wanted = process.env.MODELS?.split(',').map((id) => id.trim())
-const models = wanted ? MODEL_PROFILES.filter((profile) => wanted.includes(profile.id)) : MODEL_PROFILES
+const models = wanted
+  ? MODEL_PROFILES.filter((profile) => wanted.includes(profile.id))
+  : MODEL_PROFILES
 
 function editableRange(request: SuggestRequest) {
   if (request.mode === 'selection') return request.selection
@@ -59,7 +61,11 @@ function applyEdits(request: SuggestRequest, edits: AnchoredEdit[]): EvalResult 
     delta += edit.replacement.length - (edit.to - edit.from)
   }
 
-  return { document, passage: document.slice(range.from, range.to + delta), editCount: edits.length }
+  return {
+    document,
+    passage: document.slice(range.from, range.to + delta),
+    editCount: edits.length,
+  }
 }
 
 async function runOne(model: ModelProfile, evalCase: EvalCase, repeat: number): Promise<Run> {
@@ -69,7 +75,9 @@ async function runOne(model: ModelProfile, evalCase: EvalCase, repeat: number): 
   try {
     const { response, stats } = await suggest(evalCase.request, { apiKey: apiKey as string, model })
     const result = applyEdits(evalCase.request, response.edits)
-    const failedChecks = evalCase.checks.filter((check) => !check.passes(result)).map((check) => check.name)
+    const failedChecks = evalCase.checks
+      .filter((check) => !check.passes(result))
+      .map((check) => check.name)
 
     return {
       ...base,
@@ -117,7 +125,9 @@ function summarize(runs: Run[]) {
   const latencies = runs.map((run) => run.latencyMs)
   const cost = runs.reduce((total, run) => total + run.costUsd, 0)
   const allEdits = runs.flatMap((run) => run.edits)
-  const shortReasons = allEdits.filter((edit) => edit.reason.split(/\s+/).length <= MAX_REASON_WORDS).length
+  const shortReasons = allEdits.filter(
+    (edit) => edit.reason.split(/\s+/).length <= MAX_REASON_WORDS,
+  ).length
 
   return {
     checks: `${checks}/${checksTotal}`,

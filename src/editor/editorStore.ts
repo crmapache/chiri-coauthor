@@ -53,7 +53,10 @@ export class EditorStore {
       parent,
       state: EditorState.create({
         doc: loadDocument() ?? SAMPLE_DOCUMENT,
-        extensions: [createExtensions(this.commands), EditorView.updateListener.of(this.handleUpdate)],
+        extensions: [
+          createExtensions(this.commands),
+          EditorView.updateListener.of(this.handleUpdate),
+        ],
       }),
     })
 
@@ -92,7 +95,8 @@ export class EditorStore {
       this.saveTimer = window.setTimeout(this.saveNow, SAVE_DELAY_MS)
     }
 
-    const moved = update.docChanged || update.geometryChanged || update.viewportChanged || update.heightChanged
+    const moved =
+      update.docChanged || update.geometryChanged || update.viewportChanged || update.heightChanged
     const changed =
       moved ||
       update.selectionSet ||

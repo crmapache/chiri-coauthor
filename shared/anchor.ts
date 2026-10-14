@@ -175,7 +175,9 @@ function transplant(quote: string, matched: string, replacement: string): string
 export function clampReason(reason: string): string {
   const trimmed = reason.trim()
 
-  return trimmed.length > MAX_REASON_LENGTH ? `${trimmed.slice(0, MAX_REASON_LENGTH - 1)}…` : trimmed
+  return trimmed.length > MAX_REASON_LENGTH
+    ? `${trimmed.slice(0, MAX_REASON_LENGTH - 1)}…`
+    : trimmed
 }
 
 /**
@@ -203,7 +205,8 @@ export function anchorEdits(
     }
 
     const matched = document.slice(located.from, located.to)
-    const replacement = matched === raw.quote ? raw.replacement : transplant(raw.quote, matched, raw.replacement)
+    const replacement =
+      matched === raw.quote ? raw.replacement : transplant(raw.quote, matched, raw.replacement)
 
     if (replacement === matched) {
       failures.push({ quote: raw.quote, reason: 'no-change' })

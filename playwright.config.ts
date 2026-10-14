@@ -11,7 +11,12 @@ export default defineConfig({
     baseURL: `http://localhost:${E2E_PORT}`,
     trace: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+  ],
   webServer: {
     command: 'pnpm dev',
     url: `http://localhost:${E2E_PORT}`,

@@ -9,7 +9,12 @@ describe('placeEdits', () => {
     let state = EditorState.create({ doc: 'one two three', extensions: [pendingField] })
 
     state = state.update({ effects: startPending.of({ id: 'r', highlight: null }) }).state
-    state = state.update({ changes: [{ from: 0, insert: '> ' }, { from: 4, to: 7, insert: '2' }] }).state
+    state = state.update({
+      changes: [
+        { from: 0, insert: '> ' },
+        { from: 4, to: 7, insert: '2' },
+      ],
+    }).state
 
     const { suggestions, stale } = placeEdits(
       state,

@@ -2,7 +2,9 @@
 export function shorten(text: string, limit = 32): string {
   const characters = Array.from(text.replace(/\s+/g, ' ').trim())
 
-  return characters.length > limit ? `${characters.slice(0, limit - 1).join('')}…` : characters.join('')
+  return characters.length > limit
+    ? `${characters.slice(0, limit - 1).join('')}…`
+    : characters.join('')
 }
 
 export function plural(count: number, word: string): string {

@@ -35,8 +35,8 @@ rejecting or pushing back on each one.
 - The writer stays in charge. Typing into the text an edit refers to removes that edit, because it
   is now about text that no longer exists. Typing elsewhere just moves edits along.
 - One request at a time. A new request cancels the one in flight; `Esc` cancels too.
-- Every failure (network, budget cap, unusable model output) ends in a short message next to the
-  status, never in a broken editor.
+- Every failure (network, budget cap, unusable model output) ends in a short message at the bottom
+  of the screen, never in a broken editor.
 - The API key lives on the server. The browser talks to our own `/api/suggest`, which talks to
   OpenRouter.
 

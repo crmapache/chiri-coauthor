@@ -8,7 +8,11 @@ export type DocumentWindow = { text: string; offset: number }
  * text around it for tone and terms, not every page. The window is centred on the passage and
  * snapped to line starts and ends, so the context never begins mid-sentence.
  */
-export function documentWindow(document: string, range: TextRange, maxLength = MAX_DOCUMENT_LENGTH): DocumentWindow {
+export function documentWindow(
+  document: string,
+  range: TextRange,
+  maxLength = MAX_DOCUMENT_LENGTH,
+): DocumentWindow {
   if (document.length <= maxLength) return { text: document, offset: 0 }
 
   const radius = Math.max(0, Math.floor((maxLength - (range.to - range.from)) / 2))
@@ -44,11 +48,19 @@ const WORD_CHARACTER = /[\p{L}\p{N}'’_-]/u
 export function expandToWords(document: string, range: TextRange): TextRange {
   let { from, to } = range
 
-  while (from > 0 && WORD_CHARACTER.test(document[from - 1] as string) && WORD_CHARACTER.test(document[from] as string)) {
+  while (
+    from > 0 &&
+    WORD_CHARACTER.test(document[from - 1] as string) &&
+    WORD_CHARACTER.test(document[from] as string)
+  ) {
     from--
   }
 
-  while (to < document.length && WORD_CHARACTER.test(document[to - 1] as string) && WORD_CHARACTER.test(document[to] as string)) {
+  while (
+    to < document.length &&
+    WORD_CHARACTER.test(document[to - 1] as string) &&
+    WORD_CHARACTER.test(document[to] as string)
+  ) {
     to++
   }
 

@@ -20,7 +20,7 @@ You need Node 22 or newer. The page opens with a rough draft already in it, so e
 
 Select some text and a small menu appears next to it: Improve, Shorten, Fix grammar, More formal, Friendlier, or Ask, where you type your own instruction. Cmd+K opens Ask directly. The answer comes back as edits inside the text, with removed words struck through in red and new words in green, compared word by word. Each edit gets a card in the right margin with its reason and Accept and Reject buttons. Tab accepts the edit under the cursor and moves to the next one, and Shift+Tab rejects it, so a whole batch can be handled from the keyboard.
 
-On the active card you can push back with Shorter, Simpler, Closer to mine, Another take, or your own words. The edit is rewritten in place, and the card keeps the earlier versions so you can flip back to the one you liked.
+On the active card you can push back with Shorter, Simpler, Closer to mine, Another take, or your own words. The edit is rewritten in place, and the card keeps the earlier versions, each with what you asked for it, so you can flip back to the one you liked.
 
 Review document (or Cmd+K with nothing selected) sends the whole text. The AI answers like a reviewer with up to six edits it thinks matter most, never a rewrite of everything. The whole document can also get an instruction, such as "say 'field engineers' instead of 'technicians' everywhere".
 
@@ -30,17 +30,21 @@ Accepting is a normal edit: Cmd+Z undoes it and brings the suggestion back. Undo
 
 The model never returns a new version of the text. It returns a list of edits as structured JSON, each with an exact quote from the document, its replacement and a reason. The server finds every quote in the text (`shared/anchor.ts`), first as an exact match and then ignoring whitespace and curly quotes. A quote that appears twice, or falls outside the selection, is dropped rather than guessed, because an edit applied in the wrong place is worse than a missing one. If no quote could be placed at all, the server retries once and tells the model which quotes missed. The diff is computed in the browser from the quote and the replacement, so the model has no way to change text it was not asked about.
 
+When the model only matched a quote after ignoring whitespace, its replacement is not taken as is. The parts of the quote it kept are copied from the real text and only its actual changes are applied, so a quote with a space where the document has a line break cannot glue two list items together. A refinement works the same way: if the model quotes only the sentence it changed, the rest of the passage is kept. A selection that cuts a word in half is widened to whole words before it is sent, because the model always quotes whole words.
+
 While a request is in flight, the editor records every change the writer makes (`src/editor/pendingState.ts`). When the answer arrives, each edit's position is carried through those changes. If the writer has rewritten the very words an edit is about, that edit is dropped and the message at the bottom says so.
 
 Suggestions live in CodeMirror state (`src/editor/suggestionState.ts`), not in React. After every change each suggestion checks that its original text is still there, and disappears if it is not. Undo knows about suggestions through CodeMirror's `invertedEffects`: accepting, rejecting or typing over a suggestion records how to bring it back.
 
 The margin cards are laid out like comments in Google Docs (`src/lib/cardLayout.ts`). The active card sits level with its text, the cards below it move down and the cards above it move up.
 
+Long documents are handled in two ways. A review sends the whole text, up to 40,000 characters. A selection or a refinement sends only a window of the text around the passage, so asking about one sentence works in a document of any length. The answer budget grows with the selection, and an answer cut off at the limit ends in a message asking for a shorter selection instead of a silent retry.
+
 The server side is one function that takes a Web `Request` and returns a `Response` (`server/handler.ts`). In development it runs as Vite middleware, so `pnpm dev` starts everything; on Vercel the same function is served from `api/suggest.ts`. The OpenRouter key never reaches the browser.
 
 ## Choosing the model
 
-I did not want to pick the model by feel, so I ran 15 editing tasks through four models on OpenRouter: Claude Haiku 5.5, Claude Sonnet 5.5, GPT-6 Luna and Gemini 3.8 Flash. Sonnet 5.5 passed every check, had the fastest median answer (2.9 s) and made the tightest edits with the most useful reasons, at about half a cent per request. GPT-6 Luna also passed every check at a fraction of the cost but quotes whole paragraphs to change a few words, which makes the inline diff noisy. Setting `OPENROUTER_MODEL=openai/gpt-6-luna` switches to it. The numbers and examples are in [evals/README.md](evals/README.md).
+I ran 15 editing tasks through four models on OpenRouter: Claude Haiku 5.5, Claude Sonnet 5.5, GPT-6 Luna and Gemini 3.8 Flash. Sonnet 5.5 passed every check and had the fastest median answer among the models that passed every check (2.9 s vs 2.6 s for Haiku, which failed on complex cases), at about half a cent per request. I preferred Sonnet's wording and more specific reasons. GPT-6 Luna also passed every check at a fraction of the cost. It often quotes more surrounding text, but a long quote does not turn a small edit into a red-and-green paragraph: the word-level diff keeps unchanged words unchanged. Quote length measures the span of a suggestion, not how much text changed. Setting `OPENROUTER_MODEL=openai/gpt-6-luna` switches to Luna. The numbers and examples are in [evals/README.md](evals/README.md).
 
 ## Trade-offs
 
@@ -52,7 +56,9 @@ Only one request runs at a time. A new request cancels the one in flight, so the
 
 There is no chat. The brief warns against a chatbot in a sidebar, and every interaction here happens on the text itself or on the card of one edit.
 
-The document is saved to the browser's localStorage. Suggestions are not saved and do not survive a reload.
+The document is saved to the browser's localStorage, also when the tab is closed mid-sentence. Suggestions are not saved and do not survive a reload.
+
+One known gap: arriving suggestions are not part of the undo history. If you reject a suggestion and then ask about the same words again, Cmd+Z cannot bring the rejected one back, because the new suggestion now covers its text.
 
 ## What I would do with more time
 

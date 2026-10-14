@@ -1,0 +1,457 @@
+{
+  "startedAt": "2026-10-13T22:10:51.029Z",
+  "repeats": 1,
+  "results": [
+    {
+      "model": {
+        "id": "anthropic/claude-sonnet-5.5",
+        "label": "Claude Sonnet 5.5",
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "runs": [
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "grammar-paragraph",
+          "repeat": 1,
+          "latencyMs": 2991,
+          "costUsd": 0.004618,
+          "attempts": 1,
+          "proposed": 2,
+          "placed": 2,
+          "checksPassed": 4,
+          "checksTotal": 4,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 55,
+              "to": 97,
+              "quote": "Our customers in the field has been asking",
+              "replacement": "Our customers in the field have been asking",
+              "reason": "Subject-verb agreement: plural 'customers' needs 'have'."
+            },
+            {
+              "from": 284,
+              "to": 320,
+              "quote": "they loose whatever they were typing",
+              "replacement": "they lose whatever they were typing",
+              "reason": "'Loose' is misspelled; the verb is 'lose'."
+            }
+          ],
+          "note": "Fixed one agreement error and one misspelling in the passage; nothing else changed."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "partial-selection",
+          "repeat": 1,
+          "latencyMs": 2579,
+          "costUsd": 0.003582,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 284,
+              "to": 303,
+              "quote": "they loose whatever",
+              "replacement": "they lose whatever",
+              "reason": "\"loose\" is a misspelling of \"lose\"."
+            }
+          ],
+          "note": "Fixed one spelling error in the passage."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "add-without-inventing",
+          "repeat": 1,
+          "latencyMs": 2356,
+          "costUsd": 0.004516,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 2,
+          "checksTotal": 2,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 396,
+              "to": 461,
+              "quote": "because support tickets about lost work went up 40% last quarter.",
+              "replacement": "because support tickets about lost work went up 40% last quarter. We expect offline mode to stop technicians losing work in low-signal areas and to bring those tickets down.",
+              "reason": "Adds the requested sentence on expected impact, without new figures."
+            }
+          ],
+          "note": "Added one impact sentence without inventing numbers; you may want to add a target for the ticket reduction."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "improve-keeps-facts",
+          "repeat": 1,
+          "latencyMs": 2599,
+          "costUsd": 0.004682,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 4,
+          "checksTotal": 4,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 1000,
+              "to": 1183,
+              "quote": "If the beta goes well we will roll out to everyone in April, but this depends on the results of the beta and also on whether the sync bugs that was found in testing are fixed by then.",
+              "replacement": "If the beta goes well and the sync bugs found in testing are fixed by then, we will roll out to everyone in April.",
+              "reason": "Removes redundancy and fixes the \"bugs that was\" agreement error."
+            }
+          ],
+          "note": "Merged the repeated condition into one sentence and fixed grammar; meaning unchanged."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "shorten-keeps-facts",
+          "repeat": 1,
+          "latencyMs": 2816,
+          "costUsd": 0.004542,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 1000,
+              "to": 1183,
+              "quote": "If the beta goes well we will roll out to everyone in April, but this depends on the results of the beta and also on whether the sync bugs that was found in testing are fixed by then.",
+              "replacement": "If the beta goes well and the sync bugs found in testing are fixed, we will roll out to everyone in April.",
+              "reason": "Removes the repeated condition and fixes the agreement error."
+            }
+          ],
+          "note": "Merged the two overlapping conditions into one sentence; all facts are kept."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "formal-tone",
+          "repeat": 1,
+          "latencyMs": 3870,
+          "costUsd": 0.006454,
+          "attempts": 1,
+          "proposed": 3,
+          "placed": 3,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 55,
+              "to": 142,
+              "quote": "Our customers in the field has been asking for offline mode for a really long time now.",
+              "replacement": "Our customers in the field have been requesting offline mode for a considerable time.",
+              "reason": "Formal register; fixes subject-verb agreement."
+            },
+            {
+              "from": 209,
+              "to": 321,
+              "quote": "where the signal is basically non-existent, and when the app can't connect they loose whatever they were typing.",
+              "replacement": "where connectivity is virtually non-existent, and when the app cannot connect, they lose whatever they were entering.",
+              "reason": "Removes contraction and casual wording; fixes \"loose\"."
+            },
+            {
+              "from": 322,
+              "to": 461,
+              "quote": "It's super frustrating for them and honestly it's frustrating for us too, because support tickets about lost work went up 40% last quarter.",
+              "replacement": "This is highly frustrating for them, and for our team as well, as support tickets about lost work rose by 40% last quarter.",
+              "reason": "Removes colloquial phrasing and contraction."
+            }
+          ],
+          "note": "Formalized the tone and fixed two grammar slips (\"has been\", \"loose\") within the passage."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "list-item-markdown",
+          "repeat": 1,
+          "latencyMs": 2437,
+          "costUsd": 0.003632,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 2,
+          "checksTotal": 2,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 638,
+              "to": 663,
+              "quote": "have there changes synced",
+              "replacement": "have their changes synced",
+              "reason": "Wrong word: 'there' should be possessive 'their'."
+            }
+          ],
+          "note": "Fixed one homophone error in the passage; nothing else changed."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "link-preserved",
+          "repeat": 1,
+          "latencyMs": 6036,
+          "costUsd": 0.005592,
+          "attempts": 1,
+          "proposed": 2,
+          "placed": 2,
+          "checksPassed": 2,
+          "checksTotal": 2,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 1204,
+              "to": 1348,
+              "quote": "We still need to figure out how much storage we can use on older Android phones, and whether photos should be compressed before they are stored.",
+              "replacement": "We're still working out how much storage we can use on older Android phones, and whether we should compress photos before storing them.",
+              "reason": "Uses \"we're\" and active phrasing for a friendlier voice."
+            },
+            {
+              "from": 1349,
+              "to": 1465,
+              "quote": "Any thoughts on this are very welcome, just leave a comment in the [design doc](https://example.com/offline-design).",
+              "replacement": "We'd love to hear what you think! Just leave a comment in the [design doc](https://example.com/offline-design).",
+              "reason": "Direct invitation sounds warmer and more conversational."
+            }
+          ],
+          "note": "Warmed the open-questions paragraph with contractions and a friendlier invitation; link and facts untouched."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "clean-sentence",
+          "repeat": 1,
+          "latencyMs": 2028,
+          "costUsd": 0.00318,
+          "attempts": 1,
+          "proposed": 0,
+          "placed": 0,
+          "checksPassed": 1,
+          "checksTotal": 1,
+          "failedChecks": [],
+          "edits": [],
+          "note": "The passage has no spelling, grammar or punctuation errors, so I made no changes."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "spanish-stays-spanish",
+          "repeat": 1,
+          "latencyMs": 2646,
+          "costUsd": 0.003848,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 4,
+          "checksTotal": 4,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 25,
+              "to": 110,
+              "quote": "Ayer habían muchas personas en la reunión y nadie sabia que hacer con el presupuesto.",
+              "replacement": "Ayer había muchas personas en la reunión y nadie sabía qué hacer con el presupuesto.",
+              "reason": "Concordancia de «haber» impersonal y tildes en «sabía» y «qué»."
+            }
+          ],
+          "note": "Corregí solo la gramática y las tildes de la primera oración; la segunda ya era correcta."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "review-document",
+          "repeat": 1,
+          "latencyMs": 3984,
+          "costUsd": 0.007666,
+          "attempts": 1,
+          "proposed": 6,
+          "placed": 6,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 55,
+              "to": 142,
+              "quote": "Our customers in the field has been asking for offline mode for a really long time now.",
+              "replacement": "Our customers in the field have been asking for offline mode for a long time.",
+              "reason": "Subject-verb agreement; trims filler."
+            },
+            {
+              "from": 284,
+              "to": 320,
+              "quote": "they loose whatever they were typing",
+              "replacement": "they lose whatever they were typing",
+              "reason": "Typo: \"loose\" should be \"lose\"."
+            },
+            {
+              "from": 322,
+              "to": 419,
+              "quote": "It's super frustrating for them and honestly it's frustrating for us too, because support tickets",
+              "replacement": "It's frustrating for them and for us: support tickets",
+              "reason": "Cuts filler and repetition; tighter sentence."
+            },
+            {
+              "from": 638,
+              "to": 677,
+              "quote": "have there changes synced automatically",
+              "replacement": "have their changes synced automatically",
+              "reason": "Wrong word: \"there\" should be \"their\"."
+            },
+            {
+              "from": 810,
+              "to": 936,
+              "quote": "It was decided by the team that we will not support creating brand new jobs offline in this release, since it touches billing.",
+              "replacement": "We will not support creating new jobs offline in this release, since it touches billing.",
+              "reason": "Passive voice is wordy; active is clearer."
+            },
+            {
+              "from": 1061,
+              "to": 1183,
+              "quote": "but this depends on the results of the beta and also on whether the sync bugs that was found in testing are fixed by then.",
+              "replacement": "but that depends on the beta results and on fixing the sync bugs found in testing.",
+              "reason": "Fixes agreement and removes redundancy."
+            }
+          ],
+          "note": "Fixed grammar and typos, and tightened a few wordy sentences."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "review-restraint",
+          "repeat": 1,
+          "latencyMs": 2211,
+          "costUsd": 0.002494,
+          "attempts": 1,
+          "proposed": 0,
+          "placed": 0,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [],
+          "note": "The update is already clear, specific and well ordered, so I left it unchanged."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "rename-term-everywhere",
+          "repeat": 1,
+          "latencyMs": 2845,
+          "costUsd": 0.004286,
+          "attempts": 1,
+          "proposed": 2,
+          "placed": 2,
+          "checksPassed": 2,
+          "checksTotal": 2,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 143,
+              "to": 178,
+              "quote": "Technicians often work in basements",
+              "replacement": "Field engineers often work in basements",
+              "reason": "Use 'field engineers' as instructed."
+            },
+            {
+              "from": 487,
+              "to": 526,
+              "quote": "The first version will let technicians:",
+              "replacement": "The first version will let field engineers:",
+              "reason": "Use 'field engineers' as instructed."
+            }
+          ],
+          "note": "Only replaced 'technicians' with 'field engineers' in both places, as requested; nothing else changed."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "review-with-instruction",
+          "repeat": 1,
+          "latencyMs": 4153,
+          "costUsd": 0.007594,
+          "attempts": 1,
+          "proposed": 5,
+          "placed": 5,
+          "checksPassed": 3,
+          "checksTotal": 3,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 55,
+              "to": 142,
+              "quote": "Our customers in the field has been asking for offline mode for a really long time now.",
+              "replacement": "Our customers in the field have been asking for offline mode for a long time.",
+              "reason": "Fixes subject-verb agreement and cuts filler."
+            },
+            {
+              "from": 284,
+              "to": 403,
+              "quote": "they loose whatever they were typing. It's super frustrating for them and honestly it's frustrating for us too, because",
+              "replacement": "they lose whatever they were typing. That frustrates them, and it frustrates us too:",
+              "reason": "Fixes typo; drops hedging intensifiers."
+            },
+            {
+              "from": 638,
+              "to": 677,
+              "quote": "have there changes synced automatically",
+              "replacement": "have their changes synced automatically",
+              "reason": "Wrong word: 'there' should be 'their'."
+            },
+            {
+              "from": 810,
+              "to": 936,
+              "quote": "It was decided by the team that we will not support creating brand new jobs offline in this release, since it touches billing.",
+              "replacement": "We will not support creating new jobs offline in this release, since it touches billing.",
+              "reason": "Active voice states the decision directly."
+            },
+            {
+              "from": 1000,
+              "to": 1183,
+              "quote": "If the beta goes well we will roll out to everyone in April, but this depends on the results of the beta and also on whether the sync bugs that was found in testing are fixed by then.",
+              "replacement": "If the beta goes well, we will roll out to everyone in April, provided the sync bugs found in testing are fixed by then.",
+              "reason": "Removes redundancy and fixes grammar."
+            }
+          ],
+          "note": "Fixed grammar slips and trimmed hedging so the plan sounds more assured."
+        },
+        {
+          "model": "anthropic/claude-sonnet-5.5",
+          "caseId": "refine-keeps-figure",
+          "repeat": 1,
+          "latencyMs": 3746,
+          "costUsd": 0.005774,
+          "attempts": 1,
+          "proposed": 1,
+          "placed": 1,
+          "checksPassed": 2,
+          "checksTotal": 2,
+          "failedChecks": [],
+          "edits": [
+            {
+              "from": 55,
+              "to": 461,
+              "quote": "Our customers in the field has been asking for offline mode for a really long time now. Technicians often work in basements, rural sites and other places where the signal is basically non-existent, and when the app can't connect they loose whatever they were typing. It's super frustrating for them and honestly it's frustrating for us too, because support tickets about lost work went up 40% last quarter.",
+              "replacement": "Field technicians have long asked for offline mode: in basements and rural sites the app loses their work when it cannot connect, and support tickets about lost work went up 40% last quarter.",
+              "reason": "Restores the 40% figure, folded into the shortened version."
+            }
+          ],
+          "note": "Kept the shorter version and added the 40% support-ticket figure back as the closing evidence."
+        }
+      ],
+      "summary": {
+        "checks": "41/41",
+        "checkRate": 1,
+        "casesClean": 1,
+        "placementRate": 1,
+        "shortReasonRate": 1,
+        "retries": 0,
+        "errors": 0,
+        "medianMs": 2816,
+        "p90Ms": 4153,
+        "costPerRequest": 0.004830666666666666,
+        "totalCost": 0.07246
+      }
+    }
+  ]
+}

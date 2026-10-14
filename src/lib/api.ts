@@ -1,4 +1,9 @@
-import type { ApiErrorBody, ApiErrorCode, SuggestRequest, SuggestResponse } from '../../shared/contract'
+import type {
+  ApiErrorBody,
+  ApiErrorCode,
+  SuggestRequest,
+  SuggestResponse,
+} from '../../shared/contract'
 
 export type ClientErrorCode = ApiErrorCode | 'network' | 'aborted'
 
