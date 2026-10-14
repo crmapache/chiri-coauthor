@@ -2,6 +2,8 @@
 
 A Markdown editor where the AI works like a human editor in suggesting mode. Its edits appear in your text as tracked changes, each with a one-line reason in the margin, and you accept, reject or push back on them one at a time while you keep writing.
 
+**Live demo:** [chiri-coauthor.vercel.app](https://chiri-coauthor.vercel.app)
+
 ![Selecting a paragraph, fixing its grammar, accepting edits with Tab, reviewing the whole document and refining a suggestion](docs/demo.gif)
 
 ## Running it
